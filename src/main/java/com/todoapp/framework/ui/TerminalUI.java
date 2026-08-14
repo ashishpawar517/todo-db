@@ -29,20 +29,20 @@ public class TerminalUI implements TodoListPresenter {
         }
 
         System.out.println(ANSI_BLUE + "=== Todo List ===" + ANSI_RESET);
-        System.out.printf("%-4s %-50s %-12s %-20s%n", "ID", "Description", "Status", "Created");
-        System.out.println(ANSI_BLUE + "--------------------------------------------------" + ANSI_RESET);
+        System.out.printf("%-8s %-40s %-12s %-20s%n", "ID", "Description", "Status", "Created");
+        System.out.println(ANSI_BLUE + "---------------------------------------------------------------------" + ANSI_RESET);
 
         for (TodoItem item : items) {
             String status = item.isCompleted() ? "[DONE]" : "[TODO]";
             String statusColor = item.isCompleted() ? ANSI_GREEN : ANSI_RESET;
 
-            String id = item.getId().length() > 3 ? item.getId().substring(0, 3) + "..." : item.getId();
-            String description = item.getDescription().length() > 48
-                ? item.getDescription().substring(0, 45) + "..."
+            String id = item.getId();
+            String description = item.getDescription().length() > 38
+                ? item.getDescription().substring(0, 35) + "..."
                 : item.getDescription();
             String created = item.getCreatedAt().toString().substring(0, 19).replace('T', ' ');
 
-            System.out.printf("%-4s %-50s %-12s %-20s%n",
+            System.out.printf("%-8s %-40s %-12s %-20s%n",
                 id,
                 description,
                 statusColor + status + ANSI_RESET,
