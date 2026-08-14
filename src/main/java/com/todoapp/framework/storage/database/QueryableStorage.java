@@ -29,6 +29,7 @@ public class QueryableStorage implements StorageGateway {
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());
     private final QueryEngine queryEngine;
+    private List<TodoItem> cachedItems;
 
     public QueryableStorage() {
         this(DEFAULT_FILE_NAME);
@@ -37,6 +38,9 @@ public class QueryableStorage implements StorageGateway {
     public QueryableStorage(String fileName) {
         this.fileName = Objects.requireNonNull(fileName, "File name cannot be null");
         this.queryEngine = new QueryEngine();
+        this.cachedItems = new ArrayList<>();
+        // Load initial items
+        loadItemsIntoCache();
     }
 
     @Override
@@ -97,10 +101,8 @@ public class QueryableStorage implements StorageGateway {
      * @return List of matching TodoItem objects
      */
     public List<TodoItem> executeQuery(String query) {
-        // Load current items from file
-        List<TodoItem> currentItems = load();
-        // Execute query against current items
-        return queryEngine.executeQuery(query, currentItems);
+        // Execute query against cached items to avoid redundant I/O
+        return queryEngine.executeQuery(query, cachedItems);
     }
 
     /**
@@ -109,11 +111,11 @@ public class QueryableStorage implements StorageGateway {
      * @param item TodoItem to add
      */
     public void addItem(TodoItem item) {
-        List<TodoItem> currentItems = load();
-        currentItems.add(item);
-        save(currentItems);
-        // Reload items into query engine
-        queryEngine.loadItems(currentItems);
+        updateCachedItems(items -> {
+            List<TodoItem> updatedItems = new ArrayList<>(items);
+            updatedItems.add(item);
+            return updatedItems;
+        });
     }
 
     /**
@@ -122,20 +124,18 @@ public class QueryableStorage implements StorageGateway {
      * @param item TodoItem with updated values (must have matching ID)
      */
     public void updateItem(TodoItem item) {
-        List<TodoItem> currentItems = load();
-        boolean found = false;
-        for (int i = 0; i < currentItems.size(); i++) {
-            if (currentItems.get(i).getId().equals(item.getId())) {
-                currentItems.set(i, item);
-                found = true;
-                break;
+        updateCachedItems(items -> {
+            List<TodoItem> updatedItems = new ArrayList<>(items);
+            boolean found = false;
+            for (int i = 0; i < updatedItems.size(); i++) {
+                if (updatedItems.get(i).getId().equals(item.getId())) {
+                    updatedItems.set(i, item);
+                    found = true;
+                    break;
+                }
             }
-        }
-        if (found) {
-            save(currentItems);
-            // Reload items into query engine
-            queryEngine.loadItems(currentItems);
-        }
+            return found ? updatedItems : items;
+        });
     }
 
     /**
@@ -144,11 +144,36 @@ public class QueryableStorage implements StorageGateway {
      * @param id ID of the item to remove
      */
     public void removeItem(String id) {
-        List<TodoItem> currentItems = load();
-        currentItems.removeIf(item -> item.getId().equals(id));
-        save(currentItems);
-        // Reload items into query engine
-        queryEngine.loadItems(currentItems);
+        updateCachedItems(items -> {
+            List<TodoItem> updatedItems = new ArrayList<>(items);
+            updatedItems.removeIf(item -> item.getId().equals(id));
+            return updatedItems;
+        });
+    }
+
+    /**
+     * Updates the cached items and persists to storage.
+     *
+     * @param updater Function that takes current items and returns updated items
+     */
+    private void updateCachedItems(java.util.function.Function<List<TodoItem>, List<TodoItem>> updater) {
+        List<TodoItem> currentItems = new ArrayList<>(cachedItems);
+        List<TodoItem> updatedItems = updater.apply(currentItems);
+
+        if (!updatedItems.equals(currentItems)) {
+            save(updatedItems);
+            cachedItems = updatedItems;
+            queryEngine.loadItems(cachedItems);
+        }
+    }
+
+    /**
+     * Loads items from file into the cache.
+     * Call this when the storage needs to be refreshed from disk.
+     */
+    public void loadItemsIntoCache() {
+        cachedItems = load();
+        queryEngine.loadItems(cachedItems);
     }
 
     /**
