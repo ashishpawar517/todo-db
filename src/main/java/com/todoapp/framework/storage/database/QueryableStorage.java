@@ -24,7 +24,7 @@ import java.util.Objects;
  * Provides basic querying functionality through the executeQuery method.
  */
 public class QueryableStorage implements StorageGateway {
-    private static final String DEFAULT_FILE_NAME = "todo.txt";
+    private static final String DEFAULT_FILE_NAME = "db/todo.txt";
     private final String fileName;
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());

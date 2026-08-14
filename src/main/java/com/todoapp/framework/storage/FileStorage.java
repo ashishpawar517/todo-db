@@ -21,7 +21,7 @@ import com.todoapp.domain.TodoItem;
  * id|description|completed|createdAt|completedAt
  */
 public class FileStorage implements StorageGateway {
-    private static final String DEFAULT_FILE_NAME = "todo.txt";
+    private static final String DEFAULT_FILE_NAME = "db/todo.txt";
     private final String fileName;
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
         DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());
