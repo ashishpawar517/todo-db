@@ -1,0 +1,7 @@
+
+Overengineered TODO list
+
+- using ai to build todo list which supports db from scratch, query handling and optimization stuff.. 
+
+all the fancy stuff but all using ai and sub agents
+
