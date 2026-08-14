@@ -44,6 +44,7 @@ public class Main {
      * @param args Command line arguments
      */
     public static void main(String[] args) {
+        System.out.println("Todo List Application Starting...");
         Main app = new Main();
         app.run();
     }
