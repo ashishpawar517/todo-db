@@ -1,0 +1,371 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_standalone/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Production Next.js build
+.next/_next
+.next/cache
+
+# Nuxt.js build / generate output
+.nucc
+dist
+
+# Gatsby files
+.cache/
+# Comment in the line below if you want to ignore the public folder as well.
+# public/
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# Terser 5.x cache file
+.tersers
+
+# Maya scene files
+mb ma
+ma mb
+mb ma
+mb ma
+
+# Xcode
+#
+# gitignore contributors: remember to update XCodeIgnores.gitignore - Objective-C ignores for iOS.
+##
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+*.xcscmblueprint
+
+# Obj-C/Swift specific
+*.hiredis
+*.map
+*.map.*
+*.map.backup
+*.map.base
+*.map.bkp
+*.map.old
+*.map.tmp
+*.map.save
+*.map.sav
+*.map.back
+
+# Android
+#
+# Android Templet
+/.gradle
+/local.properties
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/
+/*.iml
+/*.iws
+# NDK
+obj/
+
+# Eclipse
+#
+.gitignore
+.project
+.classpath
+.cproject
+.settings/
+.factorypath
+
+# IntelliJ
+#
+.idea/
+*.iml
+*.iws
+out/
+
+# Mia
+#
+.snapshot/
+
+# Ports
+#
+# Ports tree and installed packages
+/var/db/pkg
+
+# Symfony
+#
+.env
+.env.*
+!.env.example
+!.env.local
+!.env.ci
+!.env.test
+var/
+var/cache/*
+var/cache/dev/*
+var/cache/prod/*
+var/log/*
+var/log/dev/*
+var/log/prod/*
+var/sessions/
+
+# Laravel
+#
+.node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/Homestead/
+/.json
+/.idea
+/.vscode
+/storage/framework/views/*
+/tmp/*
+/build/
+
+# Drupal
+#
+# Specific to Drupal 7
+# files that have a specific purpose
+# (see https://www.drupal.org/node/176040 build with Drush)
+/sites/default/files/private/*
+# Specific to Drupal 8
+# Text format configuration
+config/*
+config/sync/*
+config/split/*
+# Staging directory
+# (see https://www.drupal.org/node/1913192)
+../private/
+# Private files directory
+sites/default/files/private/
+# Public files directory
+sites/default/files/
+# Configuration files directory
+sites/default/files/config/
+# Stage directory for proxies
+sites/default/files/
+# PHP Composer
+#
+.composer*
+# Ruby
+#
+*.gem
+*.gem.*
+*.lock
+*.rbc
+.rbc
+/.bundle
+/config
+/gems/*
+/*/.*bundle/*
+*/.*bundle/*
+/*/.*bundle/*
+log/*
+tmp/*
+tmp/*/*
+/*__MACOSX
+/build/
+/.details/
+/.recipe__
+# SF
+# .sf
+# SFML
+#
+.sf
+# Java
+#
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+#
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+# Maven
+#
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.csv
+#
+# Eclipse
+#
+.project
+.bin/
+@dynamic
+@javadt
+@javadoc
+.settings/
+#
+# NetBeans
+#
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbstore/
+/.nb-gradle/
+#
+# VS Code
+#
+.vscode/
+*.code-workspace
+#
+# Folder view pattern
+.idea/
+*.iml
+#
+# Templater
+#
+.TEMPLETES
+#
+# WordPress
+#
+/wp-content/
+# WordPress Multisite
+wp-content/
+wp-content/blogs.php
+wp-content/blog-includes/
+wp-content/cache/
+wp-content/uploads/
+# Elastic Beanstalk
+#
+.elasticbeanstalk/
+#
+# Scala
+#
+# Cache directory
+.cache/
+#
+# SBT
+#
+cache/
+lib_managed/
+logs/
+project/
+project/boot/
+project/project/
+project/target/
+#
+# sbt 0.10.x
+#
+history
+#
+# Scala IDE
+#
+.metals/
+#
+# Vim
+#
+*.swp
+*.swo
+*.svn
+#
+# OSX
+#
+.DS_Store
+.AppleDouble
+.LSOverride
+# Icon must end with two \r
+Downloads
+Library
+Applications
+Desktop Pictures
+Fonts
+
+# Linux
+#
+*~
+
+# Windows
+#
+# Windows image file comments
+Thumbs.db
+#
+# Windows Folder comments
+Desktop.ini
+#
+# Hibernate
+#
