@@ -12,6 +12,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>ashishpawar517</sonar.organization>
+        <!-- Source - https://stackoverflow.com/a/73851204 Posted by Codrut Retrieved 2026-08-21, License - CC BY-SA 4.0 -->
+        <sonar.java.fileByFile>true</sonar.java.fileByFile>
     </properties>
 
     <dependencies>
