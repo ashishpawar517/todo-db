@@ -23,7 +23,8 @@ public class BasicSQLParser implements SQLParser {
         // Handle SELECT * FROM tablename [WHERE condition]
         if (upperSql.startsWith("SELECT * FROM ")) {
             // Extract table name and WHERE clause
-            String remaining = trimmedSql.substring("SELECT * FROM ".length());
+            int selectFromLength = "SELECT * FROM ".length();
+            String remaining = trimmedSql.substring(selectFromLength);
 
             int whereIndex = upperSql.indexOf(" WHERE ");
             String tableName;
@@ -35,7 +36,7 @@ public class BasicSQLParser implements SQLParser {
                 whereClauseSql = null;
             } else {
                 // Has WHERE clause
-                tableName = remaining.substring(0, whereIndex).trim();
+                tableName = remaining.substring(0, whereIndex - selectFromLength).trim();
                 whereClauseSql = trimmedSql.substring(whereIndex + 7); // +7 for " WHERE "
             }
 
