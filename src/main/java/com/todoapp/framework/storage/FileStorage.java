@@ -36,6 +36,16 @@ public class FileStorage implements StorageGateway {
 
     @Override
     public void save(List<TodoItem> items) {
+        // Ensure parent directory exists
+        File file = new File(fileName);
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            boolean dirsCreated = parentDir.mkdirs();
+            if (!dirsCreated) {
+                throw new RuntimeException("Failed to create directory: " + parentDir.getAbsolutePath());
+            }
+        }
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (TodoItem item : items) {
                 String line = formatTodoItem(item);

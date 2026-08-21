@@ -30,33 +30,52 @@ public class TerminalUI implements TodoListPresenter {
 
         System.out.println(ANSI_BLUE + "=== Todo List ===" + ANSI_RESET);
 
-        // Table header
-        System.out.printf("+%-8s+%-40s+%-12s+%-20s+%n",
-            "----------", "----------------------------------------", "------------", "--------------------");
-        System.out.printf("| %-8s | %-40s | %-12s | %-20s |%n",
-            "ID", "Description", "Status", "Created");
-        System.out.printf("+%-8s+%-40s+%-12s+%-20s+%n",
-            "----------", "----------------------------------------", "------------", "--------------------");
+        // Calculate column widths based on content and headers
+        int idWidth = Math.max("ID".length(),
+                              items.stream().mapToInt(i -> i.getId().length()).max().orElse(0));
+        int descWidth = Math.max("Description".length(),
+                                items.stream().mapToInt(i -> i.getDescription().length()).max().orElse(0));
+        // Cap description width at 50 to prevent extremely wide tables
+        if (descWidth > 50) descWidth = 50;
+        int statusWidth = Math.max("Status".length(),
+                                  items.stream().mapToInt(i ->
+                                       i.isCompleted() ? "[DONE]".length() : "[TODO]".length()).max().orElse(0));
+        int createdWidth = Math.max("Created".length(),
+                                   items.stream().mapToInt(i ->
+                                       i.getCreatedAt().toString().substring(0, 19).replace('T', ' ').length()).max().orElse(0));
 
+        // Create format strings
+        String headerFormat = "| %-" + idWidth + "s | %-" + descWidth + "s | %-" + statusWidth + "s | %-" + createdWidth + "s |%n";
+        String separatorFormat = "+-%s-+-%s-+-%s-+-%s-+%n"
+            .formatted("-".repeat(idWidth), "-".repeat(descWidth), "-".repeat(statusWidth), "-".repeat(createdWidth));
+
+        // Print header
+        System.out.printf(separatorFormat);
+        System.out.printf(headerFormat, "ID", "Description", "Status", "Created");
+        System.out.printf(separatorFormat);
+
+        // Print rows
         for (TodoItem item : items) {
             String status = item.isCompleted() ? "[DONE]" : "[TODO]";
             String statusColor = item.isCompleted() ? ANSI_GREEN : ANSI_RESET;
 
             String id = item.getId();
-            String description = item.getDescription().length() > 38
-                ? item.getDescription().substring(0, 38)
-                : item.getDescription();
+            String description = item.getDescription();
+            // Truncate description if too long for column
+            if (description.length() > descWidth) {
+                description = description.substring(0, descWidth - 3) + "...";
+            }
             String created = item.getCreatedAt().toString().substring(0, 19).replace('T', ' ');
 
-            System.out.printf("| %-8s | %-40s | %-12s | %-20s |%n",
+            System.out.printf("| %-" + idWidth + "s | %-" + descWidth + "s | %-" + statusWidth + "s | %-" + createdWidth + "s |%n",
                 id,
                 description,
                 statusColor + status + ANSI_RESET,
                 created);
         }
 
-        System.out.printf("+%-8s+%-40s+%-12s+%-20s+%n",
-            "----------", "----------------------------------------", "------------", "--------------------");
+        // Print footer
+        System.out.printf(separatorFormat);
         System.out.println("Total: " + items.size() + " items");
     }
 
