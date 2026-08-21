@@ -193,7 +193,7 @@ public class QueryableStorage implements StorageGateway {
      *
      * @param updater Function that takes current items and returns updated items
      */
-    private void updateCachedItems(Function<List<TodoItem>, List<TodoItem>> updater) {
+    private synchronized void updateCachedItems(Function<List<TodoItem>, List<TodoItem>> updater) {
         List<TodoItem> currentItems = new ArrayList<>(cachedItems);
         List<TodoItem> updatedItems = updater.apply(currentItems);
 

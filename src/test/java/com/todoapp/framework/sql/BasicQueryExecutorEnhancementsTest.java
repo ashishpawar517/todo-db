@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +46,9 @@ class BasicQueryExecutorEnhancementsTest {
     void testExecuteInsertDuplicateId() {
         // TODO: Depending on implementation, inserting duplicate ID might throw an exception or update
         // For now, we expect UnsupportedOperationException because INSERT is not implemented
-        InsertStatement insertStatement = new InsertStatement("todos",
-                List.of("id", "description", "completed", "createdAt", "completedAt"),
-                List.of("1", "Duplicate ID", false, Instant.now(), null));
+        List<String> columnNames = Arrays.asList("id", "description", "completed", "createdAt", "completedAt");
+        List<Object> values = Arrays.asList("1", "Duplicate ID", false, Instant.now(), null);
+        InsertStatement insertStatement = new InsertStatement("todos", columnNames, values);
         assertThrows(UnsupportedOperationException.class, () ->
                 executor.executeInsert(insertStatement, items));
     }
