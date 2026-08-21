@@ -34,10 +34,21 @@ When resolving merge conflicts:
 
 ## Best Practices
 - Always check status before and after operations
-- Use descriptive commit messages
+- Use descriptive commit messages following Conventional Commits specification
 - Fetch before pulling/pushing when working with remotes
 - Keep commits focused and atomic: each commit should represent a single logical change
 - If multiple unrelated changes exist, split them into separate commits
 - Use `git add -p` or interactive staging to selectively stage changes for atomic commits
 - Avoid committing unrelated files together in the same commit
-- Follow Conventional Commits specification (https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit messages: use types like feat, fix, docs, etc., and include scope and description.
+
+### Conventional Commits Guidelines
+- Commit structure: `<type>(<scope>): <description>`
+- Types: feat (new feature), fix (bug fix), docs, style, refactor, perf, test, chore, etc.
+- Scope: optional, provides contextual information (e.g., feat(parser): add ability to parse arrays)
+- Description: short summary of code changes
+- Breaking changes: add `!` after type/scope or use `BREAKING CHANGE:` in footer
+- Examples: 
+  - `fix: array parsing issue when multiple spaces were contained in string`
+  - `feat(lang): add Polish language`
+  - `docs: correct spelling of CHANGELOG`
+  - `feat!: send an email to the customer when a product is shipped`
