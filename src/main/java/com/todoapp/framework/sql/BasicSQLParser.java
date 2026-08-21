@@ -71,20 +71,27 @@ public class BasicSQLParser implements SQLParser {
         String upperWhere = whereClause.toUpperCase();
         if (upperWhere.endsWith(" IS NOT NULL")) {
             String fieldName = whereClause.substring(0, whereClause.length() - 12).trim();
-            Expression fieldExpr = new FieldReferenceExpression(fieldName);
-            return new IsNullExpression(fieldExpr, false); // false = IS NOT NULL
+            // Assume field names do not contain spaces; if they do, treat as not a match
+            if (!fieldName.contains(" ")) {
+                Expression fieldExpr = new FieldReferenceExpression(fieldName);
+                return new IsNullExpression(fieldExpr, false); // false = IS NOT NULL
+            }
         } else if (upperWhere.endsWith(" IS NULL")) {
             String fieldName = whereClause.substring(0, whereClause.length() - 8).trim();
-            Expression fieldExpr = new FieldReferenceExpression(fieldName);
-            return new IsNullExpression(fieldExpr, true); // true = IS NULL
+            // Assume field names do not contain spaces; if they do, treat as not a match
+            if (!fieldName.contains(" ")) {
+                Expression fieldExpr = new FieldReferenceExpression(fieldName);
+                return new IsNullExpression(fieldExpr, true); // true = IS NULL
+            }
         }
 
-        // Handle AND and OR (split on these operators)
-        // This is a very simplified approach - a real parser would handle precedence properly
+        // Handle OR first (lower precedence)
+        if (upperWhere.contains(" OR ")) {
+            return parseLogicalExpression(whereClause, LogicalOperator.OR);
+        }
+        // Handle AND (higher precedence)
         if (upperWhere.contains(" AND ")) {
             return parseLogicalExpression(whereClause, LogicalOperator.AND);
-        } else if (upperWhere.contains(" OR ")) {
-            return parseLogicalExpression(whereClause, LogicalOperator.OR);
         }
 
         // Handle comparison operations
