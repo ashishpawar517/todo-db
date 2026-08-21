@@ -36,4 +36,8 @@ When resolving merge conflicts:
 - Always check status before and after operations
 - Use descriptive commit messages
 - Fetch before pulling/pushing when working with remotes
-- Keep commits focused and atomic
+- Keep commits focused and atomic: each commit should represent a single logical change
+- If multiple unrelated changes exist, split them into separate commits
+- Use `git add -p` or interactive staging to selectively stage changes for atomic commits
+- Avoid committing unrelated files together in the same commit
+- Follow Conventional Commits specification (https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit messages: use types like feat, fix, docs, etc., and include scope and description.
