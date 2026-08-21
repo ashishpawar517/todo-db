@@ -1,5 +1,8 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+import java.time.Instant;
+
 /**
  * Represents a comparison expression in a SQL-like WHERE clause.
  * Supports comparisons like: field = value, field != value, field < value, etc.

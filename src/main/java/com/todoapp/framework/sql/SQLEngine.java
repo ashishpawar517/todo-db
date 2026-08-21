@@ -1,5 +1,9 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Facade that combines SQLParser and QueryExecutor to provide a simple interface
  * for executing SQL-like queries, similar to the old QueryEngine but with better

@@ -1,5 +1,7 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+
 /**
  * Represents a logical expression (AND/OR) in a SQL-like WHERE clause.
  */

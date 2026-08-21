@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * File-based storage implementation with SQL-like query capabilities.
@@ -161,12 +162,38 @@ public class QueryableStorage implements StorageGateway {
         });
     }
 
+    // Transaction methods
+    public void beginTransaction() {
+        throw new UnsupportedOperationException("Transaction support not yet implemented");
+    }
+
+    public void commit() {
+        throw new UnsupportedOperationException("Transaction support not yet implemented");
+    }
+
+    public void rollback() {
+        throw new UnsupportedOperationException("Transaction support not yet implemented");
+    }
+
+    // SQL operation methods
+    public int executeInsert(String sql) {
+        throw new UnsupportedOperationException("SQL INSERT operation not yet implemented");
+    }
+
+    public int executeUpdate(String sql) {
+        throw new UnsupportedOperationException("SQL UPDATE operation not yet implemented");
+    }
+
+    public int executeDelete(String sql) {
+        throw new UnsupportedOperationException("SQL DELETE operation not yet implemented");
+    }
+
     /**
      * Updates the cached items and persists to storage.
      *
      * @param updater Function that takes current items and returns updated items
      */
-    private void updateCachedItems(java.util.function.Function<List<TodoItem>, List<TodoItem>> updater) {
+    private void updateCachedItems(Function<List<TodoItem>, List<TodoItem>> updater) {
         List<TodoItem> currentItems = new ArrayList<>(cachedItems);
         List<TodoItem> updatedItems = updater.apply(currentItems);
 

@@ -1,5 +1,7 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+
 /**
  * Represents an IS NULL or IS NOT NULL expression in a SQL-like WHERE clause.
  */

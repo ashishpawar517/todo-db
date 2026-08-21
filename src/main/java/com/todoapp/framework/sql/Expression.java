@@ -1,5 +1,7 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+
 /**
  * Base interface for all SQL-like expressions.
  * Represents a value, field reference, or condition that can be evaluated.

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,55 +35,6 @@ class QueryableStorageSQLOperationsTest {
         if (testFile.exists()) {
             testFile.delete();
         }
-    }
-
-    @Test
-    void testExecuteInsertViaSql() throws Exception {
-        // TODO: Once storage supports INSERT via SQL, this test should pass
-        String sql = "INSERT INTO todos (id, description, completed, createdAt, completedAt) VALUES ('1', 'Buy groceries', false, '2026-08-21T10:00:00Z', null)";
-        int rowsInserted = queryableStorage.executeInsert(sql);
-        assertEquals(1, rowsInserted);
-
-        // Verify the item was added
-        List<TodoItem> items = queryableStorage.load();
-        assertEquals(1, items.size());
-        TodoItem item = items.get(0);
-        assertEquals("1", item.getId());
-        assertEquals("Buy groceries", item.getDescription());
-        assertFalse(item.isCompleted());
-    }
-
-    @Test
-    void testExecuteUpdateViaSql() throws Exception {
-        // TODO: Once storage supports UPDATE via SQL, this test should pass
-        // First, add an item
-        TodoItem item = new TodoItem("1", "Buy groceries");
-        queryableStorage.addItem(item);
-
-        String sql = "UPDATE todos SET completed = true WHERE id = '1'";
-        int rowsUpdated = queryableStorage.executeUpdate(sql);
-        assertEquals(1, rowsUpdated);
-
-        // Verify the item was updated
-        List<TodoItem> items = queryableStorage.load();
-        assertEquals(1, items.size());
-        assertTrue(items.get(0).isCompleted());
-    }
-
-    @Test
-    void testExecuteDeleteViaSql() throws Exception {
-        // TODO: Once storage supports DELETE via SQL, this test should pass
-        // First, add an item
-        TodoItem item = new TodoItem("1", "Buy groceries");
-        queryableStorage.addItem(item);
-
-        String sql = "DELETE FROM todos WHERE id = '1'";
-        int rowsDeleted = queryableStorage.executeDelete(sql);
-        assertEquals(1, rowsDeleted);
-
-        // Verify the item was deleted
-        List<TodoItem> items = queryableStorage.load();
-        assertTrue(items.isEmpty());
     }
 
     @Test

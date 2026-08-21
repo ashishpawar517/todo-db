@@ -1,5 +1,7 @@
 package com.todoapp.framework.sql;
 
+import com.todoapp.domain.TodoItem;
+
 /**
  * Represents a literal value in a SQL-like expression.
  * Supports string, boolean, numeric, and date literals.

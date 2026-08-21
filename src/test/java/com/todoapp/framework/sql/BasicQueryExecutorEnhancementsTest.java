@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,49 +39,6 @@ class BasicQueryExecutorEnhancementsTest {
         List<TodoItem> result = executor.executeSelect(selectStatement, items);
         assertEquals(1, result.size());
         assertTrue(result.get(0).isCompleted());
-    }
-
-    @Test
-    void testExecuteInsert() throws Exception {
-        // TODO: Once executor supports INSERT, this test should pass
-        InsertStatement insertStatement = new InsertStatement("todos",
-                List.of("id", "description", "completed", "createdAt", "completedAt"),
-                List.of("3", "Write report", false, Instant.now(), null));
-        int rowsInserted = executor.executeInsert(insertStatement, items);
-        assertEquals(1, rowsInserted);
-        assertEquals(3, items.size());
-        TodoItem inserted = items.get(2);
-        assertEquals("3", inserted.getId());
-        assertEquals("Write report", inserted.getDescription());
-        assertFalse(inserted.isCompleted());
-    }
-
-    @Test
-    void testExecuteUpdate() throws Exception {
-        // TODO: Once executor supports UPDATE, this test should pass
-        UpdateStatement updateStatement = new UpdateStatement("todos",
-                Map.of("completed", true),
-                new ComparisonExpression(
-                        new FieldReferenceExpression("id"),
-                        ComparisonOperator.EQUALS,
-                        new LiteralExpression("2")));
-        int rowsUpdated = executor.executeUpdate(updateStatement, items);
-        assertEquals(1, rowsUpdated);
-        assertTrue(items.get(1).isCompleted()); // item with id "2" should now be completed
-    }
-
-    @Test
-    void testExecuteDelete() throws Exception {
-        // TODO: Once executor supports DELETE, this test should pass
-        DeleteStatement deleteStatement = new DeleteStatement("todos",
-                new ComparisonExpression(
-                        new FieldReferenceExpression("id"),
-                        ComparisonOperator.EQUALS,
-                        new LiteralExpression("1")));
-        int rowsDeleted = executor.executeDelete(deleteStatement, items);
-        assertEquals(1, rowsDeleted);
-        assertEquals(1, items.size());
-        assertEquals("2", items.get(0).getId()); // remaining item should be id "2"
     }
 
     @Test

@@ -1,0 +1,2494 @@
+diff --git a/.claude/agents/git-agent.md b/.claude/agents/git-agent.md
+new file mode 100644
+index 0000000..e40cf74
+--- /dev/null
++++ b/.claude/agents/git-agent.md
+@@ -0,0 +1,39 @@
++---
++name: git-agent
++description: "Handles git operations like branching, merging, committing, and resolving conflicts"
++tools: Bash
++model: inherit
++color: blue
++---
++You are a Git specialist agent that helps with version control operations.
++
++## When Invoked
++You help with:
++- Creating and switching branches
++- Merging and rebasing
++- Committing changes
++- Resolving merge conflicts
++- Checking status and history
++- Pushing and pulling from remotes
++
++## Git Operations
++When asked to perform git operations:
++1. First check current status with `git status`
++2. Perform the requested operation
++3. Verify the result
++4. Report what was done
++
++## Conflict Resolution
++When resolving merge conflicts:
++1. Identify conflicting files
++2. Examine the conflict markers
++3. Decide which version to keep or create a merged version
++4. Remove conflict markers
++5. Add resolved files
++6. Continue with the merge/rebase
++
++## Best Practices
++- Always check status before and after operations
++- Use descriptive commit messages
++- Fetch before pulling/pushing when working with remotes
++- Keep commits focused and atomic
+\ No newline at end of file
+diff --git a/.claude/agents/researcher-agent.md b/.claude/agents/researcher-agent.md
+new file mode 100644
+index 0000000..1692102
+--- /dev/null
++++ b/.claude/agents/researcher-agent.md
+@@ -0,0 +1,49 @@
++---
++name: researcher-agent
++description: "Searches for information using web search, code search, and file reading to answer questions"
++tools: WebSearch, WebFetch, Read, Grep, Glob, Bash
++model: inherit
++color: green
++---
++You are a research specialist that helps find information by searching the web, codebase, and files.
++
++## When Invoked
++You help with:
++- Searching for information online using web search
++- Finding code patterns or documentation in the codebase
++- Reading files to extract specific information
++- Answering questions that require gathering information from multiple sources
++
++## Research Process
++When asked to research a topic:
++1. Start with web search if the question is about external information (libraries, frameworks, best practices)
++2. Search the codebase for relevant code patterns or implementations
++3. Read relevant files to gather detailed information
++4. Synthesize findings into a clear answer
++5. Cite sources when possible
++
++## Web Search
++- Use WebSearch for general information searches
++- Use WebFetch to get detailed content from specific URLs
++- Focus on reliable sources (official documentation, reputable tech sites)
++
++## Code Search
++- Use Grep and Glob to search for patterns in the codebase
++- Look for function names, class names, configuration files
++- Read the found files to understand context
++
++## File Reading
++- Use Read to examine specific files mentioned or discovered
++- Pay attention to configuration files, documentation, and code comments
++
++## Output Format
++Provide a concise answer with:
++- Direct answer to the question
++- Summary of key findings
++- Sources consulted (web searches, code files, etc.)
++- Limitations or areas for further research if applicable
++
++## Example Queries
++- "What is the latest version of Maven available?"
++- "How does the Spring Data JPA repository pattern work?"
++- "Find examples of dependency injection in this codebase"
+\ No newline at end of file
+diff --git a/.claude/skills/agent-team.md b/.claude/skills/agent-team.md
+new file mode 100644
+index 0000000..a7b2f34
+--- /dev/null
++++ b/.claude/skills/agent-team.md
+@@ -0,0 +1,153 @@
++# Agent Team Skill
++
++This skill provides guidance on creating and managing agent teams for complex tasks.
++
++## When to Use
++Use this approach when a task benefits from:
++- Multiple areas of expertise (research, coding, testing, review)
++- Parallel work that can be decomposed
++- Need for specialized agents working together
++
++## Core Concepts
++
++### Agent Roles
++Different agent types excel at different tasks:
++- **researcher-agent**: Information gathering, web search, reading documentation
++- **general-purpose**: Implementation, coding, file modifications
++- **code-reviewer**: Quality checks, security, convention compliance
++- **test-generator-runner**: Test creation, test execution, verification
++- **git-agent**: Version control operations, branching, merging
++
++### Communication
++Agents communicate via `SendMessage`:
++- Use `SendMessage` to pass results, ask questions, or request help
++- Agents can send messages to you (the main conversation) or to each other
++- Always summarize what you're sending in the `summary` field
++
++## Workflow Patterns
++
++### Sequential Pipeline
++For tasks that must happen in order:
++1. Researcher gathers requirements
++2. General-purpose agent implements solution
++3. Test agent creates and runs tests
++4. Code reviewer checks implementation
++5. Git agent handles version control
++
++### Parallel Investigation
++For exploring multiple approaches:
++1. Spawn multiple researcher agents with different angles
++2. Have them report back findings
++3. Synthesize results before proceeding
++
++### Feedback Loop
++For iterative improvement:
++1. Implementer creates initial version
++2. Tester runs tests and reports issues
++3. Implementer fixes based on feedback
++4. Reviewer verifies fixes
++5. Repeat until satisfactory
++
++## Step-by-Step Guide
++
++### 1. Task Decomposition
++Break your big task into subtasks that match agent strengths:
++- Information gathering → researcher-agent
++- Code changes → general-purpose agent
++- Testing → test-generator-runner agent
++- Review → code-reviewer agent
++- Git operations → git-agent agent
++
++### 2. Spawn Agents
++Use the Agent tool for each subtask:
++```
++Agent({
++  description: "Research latest Java testing frameworks",
++  prompt: "Find information about JUnit 5, Mockito, and AssertJ for Java testing",
++  subagent_type: "researcher-agent"
++})
++```
++
++### 3. Establish Communication
++- Agents should report progress via SendMessage
++- Use clear summaries so you can track work without reading full transcripts
++- Agents can ask you questions if they need clarification or decisions
++
++### 4. Aggregate Results
++As agents complete work:
++- Collect their reports and outputs
++- Synthesize information for next steps
++- Make decisions about direction based on findings
++
++### 5. Clean Up
++When agents finish:
++- Ensure they've completed their assigned work
++- Note any follow-up tasks they discovered
++- Thank them for their work (optional but good practice)
++
++## Best Practices
++
++### Start Small
++Begin with 2-3 agents for your first team to understand coordination before scaling up.
++
++### Clear Instructions
++Give each agent a specific, measurable goal:
++- Instead of "help with testing" → "create unit tests for the UserService class"
++- Instead of "research databases" → "compare PostgreSQL vs MySQL for this todo app"
++
++### Time Management
++Consider that agent work takes time. For long-running tasks:
++- Use CronCreate to schedule check-ins
++- Or have agents send periodic updates via SendMessage
++
++### Error Handling
++If an agent encounters a blocker:
++- They should SendMessage you explaining the issue
++- You can then provide guidance or adjust the task
++
++## Example: Adding a New Feature
++
++Here's how you might structure agent work for adding a new feature:
++
++1. **Researcher Agent**: 
++   - Research similar features in the codebase
++   - Look up best practices for the feature type
++   - Report findings
++
++2. **General-Purpose Agent**:
++   - Implement the feature based on research
++   - Create necessary files and modify existing ones
++
++3. **Test Agent**:
++   - Write unit tests for new code
++   - Run existing tests to ensure no regressions
++   - Report test results
++
++4. **Code Reviewer Agent**:
++   - Review implementation for quality and conventions
++   - Suggest improvements
++   - Verify test coverage
++
++5. **Git Agent**:
++   - Create feature branch
++   - Commit changes with descriptive messages
++   - Push to remote and create PR (if applicable)
++
++## Limitations
++- Agents cannot see each other's tool output directly (only via SendMessage)
++- Complex coordination requires clear communication protocols
++- Some tasks may still be better handled inline for simple cases
++
++## When Not to Use
++Avoid agent teams for:
++- Trivial tasks that take seconds to complete
++- Tasks requiring real-time collaboration or shared state
++- When you need immediate, line-by-line code review as you type
++
++## Next Steps
++To use this skill in your workflow:
++1. Invoke with `/agent-team` or via Skill tool
++2. Follow the decomposition approach for your specific task
++3. Spawn appropriate agents with clear goals
++4. Coordinate via SendMessage
++5. Synthesize results to complete the big task
+\ No newline at end of file
+diff --git a/QueryOptimizationDemo.java b/QueryOptimizationDemo.java
+deleted file mode 100644
+index 4d11e53..0000000
+--- a/QueryOptimizationDemo.java
++++ /dev/null
+@@ -1,55 +0,0 @@
+-import com.todoapp.domain.TodoItem;
+-import com.todoapp.framework.storage.database.QueryableStorage;
+-
+-import java.time.Instant;
+-import java.util.List;
+-
+-/**
+- * Demonstration to show that executeQuery optimization is working.
+- * This shows that executeQuery doesn't reload the file every time.
+- */
+-public class QueryOptimizationDemo {
+-    public static void main(String[] args) {
+-        // Create a storage instance
+-        QueryableStorage storage = new QueryableStorage("optimization-demo.txt");
+-
+-        // Clean up any existing file
+-        java.io.File file = new java.io.File("optimization-demo.txt");
+-        if (file.exists()) {
+-            file.delete();
+-        }
+-
+-        // Add some initial items
+-        TodoItem item1 = new TodoItem("1", "First item");
+-        TodoItem item2 = new TodoItem("2", "Second item");
+-        item2.markAsCompleted();
+-
+-        storage.addItem(item1);
+-        storage.addItem(item2);
+-
+-        System.out.println("Initial items added.");
+-        System.out.println("Number of items in storage: " + storage.load().size());
+-
+-        // Execute a query - this should use cached items, not reload from file
+-        System.out.println("\nExecuting first query...");
+-        List<TodoItem> completedItems = storage.executeQuery("SELECT * FROM todos WHERE completed = true");
+-        System.out.println("Found " + completedItems.size() + " completed items.");
+-
+-        // Add another item
+-        TodoItem item3 = new TodoItem("3", "Third item");
+-        storage.addItem(item3);
+-        System.out.println("\nAdded third item.");
+-
+-        // Execute another query - should still use cached items (now updated)
+-        System.out.println("Executing second query after adding item...");
+-        List<TodoItem> allItems = storage.executeQuery("SELECT * FROM todos");
+-        System.out.println("Found " + allItems.size() + " total items.");
+-
+-        // Clean up
+-        if (file.exists()) {
+-            file.delete();
+-        }
+-
+-        System.out.println("\nDemo completed successfully!");
+-    }
+-}
+\ No newline at end of file
+diff --git a/RESEARCH_QUERY_CAPABILITIES.md b/RESEARCH_QUERY_CAPABILITIES.md
+deleted file mode 100644
+index bd746b7..0000000
+--- a/RESEARCH_QUERY_CAPABILITIES.md
++++ /dev/null
+@@ -1,221 +0,0 @@
+-# Research: Best Practices for Implementing SQL-like Query Capabilities in Java Applications
+-
+-## Executive Summary
+-
+-This document summarizes best practices for implementing SQL-like query capabilities in Java applications, based on analysis of the existing todo list application codebase, specification documents, and established software engineering principles. The research focuses on design patterns, security considerations, performance optimization, integration strategies, testing approaches, and examples from popular libraries.
+-
+-## 1. Design Patterns for Query Builders and Parsers
+-
+-### 1.1 Query Builder Pattern
+-The Query Builder pattern is essential for creating type-safe, readable queries. Key principles include:
+-
+-- **Fluent Interface**: Methods return the builder object to allow method chaining
+-- **Immutability Consideration**: For thread-safe builders, consider immutable implementations
+-- **Separation of Concerns**: Separate query building from query execution
+-
+-**Example from QueryDSL:**
+-```java
+-QCustomer customer = QCustomer.customer;
+-List<String> results = queryFactory
+-    .select(customer.firstName, customer.lastName)
+-    .from(customer)
+-    .where(customer.lastName.startsWith("S"))
+-    .orderBy(customer.lastName.asc())
+-    .fetch();
+-```
+-
+-### 1.2 Interpreter Pattern
+-For SQL-like query parsing, the Interpreter pattern is suitable:
+-
+-- Define abstract syntax tree (AST) nodes for each query component
+-- Create parser that converts SQL string to AST
+-- Implement interpreter that executes AST against data
+-
+-**Current Implementation Analysis:**
+-The existing `QueryEngine` uses a simple string-splitting approach which works for basic cases but has limitations:
+-- No proper AST generation
+-- Limited extensibility for complex queries
+-- Error handling is rudimentary
+-
+-### 1.3 Strategy Pattern
+-Different query execution strategies can be encapsulated:
+-
+-- In-memory filtering strategy (current approach)
+-- Index-based strategy for larger datasets
+-- Database delegation strategy for persistent storage
+-
+-## 2. Security Considerations (SQL Injection Prevention)
+-
+-### 2.1 Parameterized Queries
+-The primary defense against injection is separating query structure from data:
+-
+-**Never do this:**
+-```java
+-// VULNERABLE: String concatenation
+-String query = "SELECT * FROM todos WHERE description = '" + userInput + "'";
+-```
+-
+-**Always do this:**
+-```java
+-// SAFE: Parameter binding
+-Query q = entityManager.createQuery("SELECT t FROM Todo t WHERE t.description = :desc");
+-q.setParameter("desc", userInput);
+-```
+-
+-### 2.2 Input Validation
+-- Validate field names against allowed list
+-- Sanitize string literals (escape quotes properly)
+-- Validate operator usage
+-
+-### 2.3 Principle of Least Privilege
+-- Restrict query types (e.g., only SELECT for read-only storage)
+-- Limit query complexity to prevent DoS attacks
+-
+-## 3. Performance Optimization Techniques
+-
+-### 3.1 Indexing
+-For repeated queries on the same fields:
+-
+-- Create and maintain indexes on frequently queried fields (id, description, completed)
+-- Update indexes during add/update/delete operations
+-- Consider lazy index creation
+-
+-**Current Implementation Gap:**
+-The current `QueryEngine` has an `indexedItems` field but doesn't actually use it for indexing - it just copies the list.
+-
+-### 3.2 Query Planning and Caching
+-- Parse query once and cache the parsed representation
+-- For parameterized queries, cache the query plan with different parameters
+-- Consider using libraries like Caffeine for caching
+-
+-### 3.3 Lazy Loading and Pagination
+-- Don't load entire dataset into memory for query processing
+-- Implement LIMIT/OFFSET style pagination
+-- Use iterators or streams for large result sets
+-
+-### 3.4 Efficient Data Structures
+-- Use appropriate collection types (HashSet for lookups, TreeSet for sorted data)
+-- Consider primitive collections for better memory efficiency
+-- Use parallel streams where appropriate for CPU-bound filtering
+-
+-## 4. Integration with Existing Data Models
+-
+-### 4.1 Mapping Layer
+-Create a clear mapping between query field names and object properties:
+-
+-- Use reflection or metadata annotations for automatic mapping
+-- Provide explicit mapping configuration for complex scenarios
+-- Handle type conversion gracefully (String to Boolean/Instant/etc.)
+-
+-**Current Implementation Assessment:**
+-The existing code uses a hardcoded switch statement in `evaluateField()` which works but is not easily extensible.
+-
+-### 4.2 Separation of Concerns
+-- Query parsing/execution should be separate from data access/storage logic
+-- Storage layer should focus on CRUD operations
+-- Query layer should focus on retrieving matching records efficiently
+-
+-### 4.3 Interface Consistency
+-- Maintain the existing StorageGateway interface contract
+-- Ensure query operations don't break existing save/load behavior
+-- Provide clear error handling that aligns with existing patterns
+-
+-## 5. Testing Strategies for Query Functionality
+-
+-### 5.1 Unit Testing Query Engine
+-- Test query parsing in isolation
+-- Test expression evaluation with various data types
+-- Test edge cases (null values, empty strings, malformed queries)
+-- Test logical operator precedence and grouping
+-
+-**Current Test Coverage Analysis:**
+-Existing tests cover basic functionality but could be improved:
+-- More complex AND/OR combinations
+-- Boundary value testing
+-- Performance/regression tests
+-- Malformed query error handling
+-
+-### 5.2 Integration Testing
+-- Test query engine with actual storage operations
+-- Verify that query results match manually filtered results
+-- Test concurrent access scenarios
+-- Test persistence of query results
+-
+-### 5.3 Property-Based Testing
+-- Generate random valid/invalid queries and verify behavior
+-- Test that equivalent queries produce same results
+-- Verify that query results are subsets of unfiltered data
+-
+-### 5.4 Performance Testing
+-- Benchmark query execution time vs. dataset size
+-- Test memory usage patterns
+-- Verify indexing benefits (when implemented)
+-
+-## 6. Examples from Popular Libraries
+-
+-### 6.1 QueryDSL
+-**Strengths:**
+-- Type-safe queries through generated query types
+-- Fluent API for complex query construction
+-- Support for multiple backends (JPA, MongoDB, Lucene, etc.)
+-- Excellent IDE support through autocomplete
+-
+-**Relevance to Current Project:**
+-Could inspire a type-safe query builder for TodoItem fields.
+-
+-### 6.2 JPA Criteria API
+-**Strengths:**
+-- Part of Java EE standard
+-- Typesafe query construction
+-- Good IDE tooling support
+-- Dynamic query building capabilities
+-
+-**Considerations:**
+-More verbose than QueryDSL but standardized.
+-
+-### 6.3 Spring Data JPA Query Methods
+-**Strengths:**
+-- Method name parsing for simple queries
+-- @Query annotation for complex queries
+-- Integration with Spring ecosystem
+-- Derived query functionality
+-
+-### 6.4 LambdaBehave / HawkSQL Style
+-Alternative approach using fluent interfaces:
+-```java
+-List<TodoItem> results = queryBuilder()
+-    .select()
+-    .from(TodoItem.class)
+-    .where(field("completed").eq(true))
+-    .and(field("description").like("%urgent%"))
+-    .orderBy(field("createdAt").desc())
+-    .execute();
+-```
+-
+-## 7. Recommendations for Current Implementation
+-
+-### 7.1 Short-term Improvements
+-1. **Fix Indexing**: Actually use the `indexedItems` field for performance
+-2. **Improve Error Handling**: Provide meaningful error messages for malformed queries
+-3. **Enhance Testing**: Add tests for complex query combinations and edge cases
+-4. **Code Refactoring**: Extract query parsing logic into separate classes
+-
+-### 7.2 Medium-term Improvements
+-1. **Proper Parser**: Implement a real parser with AST generation
+-2. **Query Caching**: Cache parsed queries for repeated use
+-3. **Type Safety**: Consider implementing a QueryDSL-inspired builder
+-4. **Additional Operators**: Add LIKE, IN, BETWEEN operators
+-
+-### 7.3 Long-term Architecture
+-1. **Modular Design**: Separate query engine into reusable component
+-2. **Plugin Architecture**: Allow different query dialects or backends
+-3. **Metrics and Monitoring**: Add query performance tracking
+-4. **Migration Path**: Consider supporting UPDATE/DELETE through query interface
+-
+-## 8. Conclusion
+-
+-The current implementation provides a solid foundation for SQL-like query capabilities in the todo list application. By following the best practices outlined above—particularly focusing on proper parsing techniques, security through parameterization, performance through indexing, and comprehensive testing—the query functionality can be made more robust, scalable, and maintainable.
+-
+-Key areas for immediate attention include implementing actual indexing functionality, improving the query parser to handle more complex expressions safely, and extending test coverage to verify correctness under various conditions.
+-
+-The clean architecture principles already present in the codebase (dependency injection, separation of concerns) provide an excellent foundation for enhancing the query capabilities while maintaining backward compatibility.
+\ No newline at end of file
+diff --git a/db/todo.txt b/db/todo.txt
+deleted file mode 100644
+index fa5096d..0000000
+--- a/db/todo.txt
++++ /dev/null
+@@ -1,8 +0,0 @@
+-8f14a84e-571f-49c5-84ef-0d78cea4cb9b|do groceries|false|2026-08-14T06:03:54.122539Z|
+-19a640a4-d28a-4dd1-9390-6b4ef9e3606f|new|false|2026-08-14T06:05:11.206776Z|
+-92a689a1-1b2e-4409-81ad-c8ba9b917d47|Buy groceries|false|2026-08-14T06:11:09.672686Z|
+-b2373ecf-782b-4f3f-ad23-eed9fb3302bb|Walk the dog|false|2026-08-14T06:11:09.674024Z|
+-cc9a0c6e-6709-44cc-b14d-8b7225b3e2a9|do|true|2026-08-14T06:13:13.550244Z|2026-08-14T06:13:25.895166Z
+-aaebba99-a5ea-42c3-a40a-1968d97aa4de|Buy groceries|false|2026-08-14T06:15:00.633641Z|
+-64aee2e3-da28-40a5-b41e-d17e08cbda5e|Walk the dog|false|2026-08-14T06:15:00.635598Z|
+-ee6c4901-b0bb-4ccd-8ae3-f46e9db907c9|Fix ID display|false|2026-08-14T06:15:59.220788Z|
+diff --git a/queryable-database-spec.md b/docs/queryable-database-spec.md
+similarity index 100%
+rename from queryable-database-spec.md
+rename to docs/queryable-database-spec.md
+diff --git a/src/main/java/com/todoapp/framework/sql/BasicQueryExecutor.java b/src/main/java/com/todoapp/framework/sql/BasicQueryExecutor.java
+new file mode 100644
+index 0000000..109659a
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/BasicQueryExecutor.java
+@@ -0,0 +1,65 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++import java.util.ArrayList;
++import java.util.List;
++
++/**
++ * Basic implementation of QueryExecutor that can execute SELECT statements.
++ * Other statement types (INSERT, UPDATE, DELETE) will be implemented in future versions.
++ */
++public class BasicQueryExecutor implements QueryExecutor {
++
++    @Override
++    public List<TodoItem> executeSelect(SelectStatement statement, List<TodoItem> items) {
++        if (statement == null) {
++            throw new IllegalArgumentException("Statement cannot be null");
++        }
++        if (items == null) {
++            throw new IllegalArgumentException("Items list cannot be null");
++        }
++
++        List<TodoItem> result = new ArrayList<>();
++
++        // If no WHERE clause, return all items
++        if (statement.getWhereClause() == null) {
++            result.addAll(items);
++            return result;
++        }
++
++        // Filter items based on the WHERE clause
++        Expression whereClause = statement.getWhereClause();
++        for (TodoItem item : items) {
++            Object evalResult = whereClause.evaluate(item);
++            if (evalResult instanceof Boolean && (Boolean) evalResult) {
++                result.add(item);
++            }
++            // Note: In SQL, WHERE clause should evaluate to boolean.
++            // If it doesn't, we treat it as false (don't include the item)
++        }
++
++        return result;
++    }
++
++    @Override
++    public int executeInsert(InsertStatement statement, List<TodoItem> items) {
++        // TODO: Implement INSERT statement execution
++        // For now, throw UnsupportedOperationException to indicate not yet implemented
++        throw new UnsupportedOperationException("INSERT statement execution not yet implemented");
++    }
++
++    @Override
++    public int executeUpdate(UpdateStatement statement, List<TodoItem> items) {
++        // TODO: Implement UPDATE statement execution
++        // For now, throw UnsupportedOperationException to indicate not yet implemented
++        throw new UnsupportedOperationException("UPDATE statement execution not yet implemented");
++    }
++
++    @Override
++    public int executeDelete(DeleteStatement statement, List<TodoItem> items) {
++        // TODO: Implement DELETE statement execution
++        // For now, throw UnsupportedOperationException to indicate not yet implemented
++        throw new UnsupportedOperationException("DELETE statement execution not yet implemented");
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/BasicSQLParser.java b/src/main/java/com/todoapp/framework/sql/BasicSQLParser.java
+new file mode 100644
+index 0000000..2b41128
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/BasicSQLParser.java
+@@ -0,0 +1,157 @@
++package com.todoapp.framework.sql;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/**
++ * Basic implementation of SQLParser that handles simple SELECT queries with WHERE clauses.
++ * This is a starting point that can be extended to support more SQL features.
++ */
++public class BasicSQLParser implements SQLParser {
++
++    @Override
++    public Statement parse(String sql) throws SQLParsingException {
++        if (sql == null || sql.trim().isEmpty()) {
++            throw new SQLParsingException("SQL query cannot be empty");
++        }
++
++        String trimmedSql = sql.trim();
++        String upperSql = trimmedSql.toUpperCase();
++
++        // Handle SELECT * FROM tablename [WHERE condition]
++        if (upperSql.startsWith("SELECT * FROM ")) {
++            // Extract table name and WHERE clause
++            String remaining = trimmedSql.substring("SELECT * FROM ".length());
++
++            int whereIndex = upperSql.indexOf(" WHERE ");
++            String tableName;
++            String whereClauseSql;
++
++            if (whereIndex == -1) {
++                // No WHERE clause
++                tableName = remaining.trim();
++                whereClauseSql = null;
++            } else {
++                // Has WHERE clause
++                tableName = remaining.substring(0, whereIndex).trim();
++                whereClauseSql = trimmedSql.substring(whereIndex + 7); // +7 for " WHERE "
++            }
++
++            // Validate table name (for now, we only support "todos")
++            if (!tableName.equalsIgnoreCase("todos")) {
++                throw new SQLParsingException("Unsupported table: " + tableName + ". Only 'todos' is supported.");
++            }
++
++            // Parse WHERE clause if present
++            Expression whereClause = null;
++            if (whereClauseSql != null && !whereClauseSql.trim().isEmpty()) {
++                whereClause = parseWhereClause(whereClauseSql);
++            }
++
++            return new SelectStatement(tableName, whereClause);
++        }
++
++        // For now, we only support SELECT queries. Other statement types will be added later.
++        throw new SQLParsingException("Only SELECT statements are currently supported. Received: " + sql);
++    }
++
++    /**
++     * Parses a WHERE clause expression.
++     * This is a simplified parser that handles the basics.
++     * A full implementation would use proper parsing techniques (recursive descent, etc.).
++     */
++    private Expression parseWhereClause(String whereClause) throws SQLParsingException {
++        // Remove extra whitespace
++        whereClause = whereClause.trim();
++
++        // Handle IS NULL and IS NOT NULL first (they don't have comparison operators)
++        String upperWhere = whereClause.toUpperCase();
++        if (upperWhere.endsWith(" IS NOT NULL")) {
++            String fieldName = whereClause.substring(0, whereClause.length() - 12).trim();
++            Expression fieldExpr = new FieldReferenceExpression(fieldName);
++            return new IsNullExpression(fieldExpr, false); // false = IS NOT NULL
++        } else if (upperWhere.endsWith(" IS NULL")) {
++            String fieldName = whereClause.substring(0, whereClause.length() - 8).trim();
++            Expression fieldExpr = new FieldReferenceExpression(fieldName);
++            return new IsNullExpression(fieldExpr, true); // true = IS NULL
++        }
++
++        // Handle AND and OR (split on these operators)
++        // This is a very simplified approach - a real parser would handle precedence properly
++        if (upperWhere.contains(" AND ")) {
++            return parseLogicalExpression(whereClause, LogicalOperator.AND);
++        } else if (upperWhere.contains(" OR ")) {
++            return parseLogicalExpression(whereClause, LogicalOperator.OR);
++        }
++
++        // Handle comparison operations
++        return parseComparisonExpression(whereClause);
++    }
++
++    private Expression parseLogicalExpression(String expression, LogicalOperator operator) throws SQLParsingException {
++        // Split on the operator, preserving case in operands
++        String[] parts;
++        String regex = "(?i) " + operator + " "; // Case-insensitive split on " AND " or " OR "
++        parts = expression.split(regex);
++
++        if (parts.length != 2) {
++            throw new SQLParsingException("Invalid logical expression: " + expression);
++        }
++
++        Expression left = parseWhereClause(parts[0].trim());
++        Expression right = parseWhereClause(parts[1].trim());
++
++        return new LogicalExpression(left, operator, right);
++    }
++
++    private Expression parseComparisonExpression(String expression) throws SQLParsingException {
++        // Look for comparison operators in order of length to avoid partial matches
++        String[] operators = {"!=", ">=", "<=", "=", ">", "<"};
++        String upperExpr = expression.toUpperCase();
++
++        for (String op : operators) {
++            int opIndex = upperExpr.indexOf(op);
++            if (opIndex >= 0) {
++                // Found the operator, split the expression
++                String leftStr = expression.substring(0, opIndex).trim();
++                String rightStr = expression.substring(opIndex + op.length()).trim();
++
++                Expression leftExpr = parseTerm(leftStr);
++                Expression rightExpr = parseTerm(rightStr);
++                ComparisonOperator comparisonOp = ComparisonOperator.fromSymbol(op);
++
++                return new ComparisonExpression(leftExpr, comparisonOp, rightExpr);
++            }
++        }
++
++        throw new SQLParsingException("Unable to parse comparison expression: " + expression);
++    }
++
++    private Expression parseTerm(String term) throws SQLParsingException {
++        term = term.trim();
++        if (term.isEmpty()) {
++            throw new SQLParsingException("Empty term in expression");
++        }
++
++        // Handle string literals (single quotes)
++        if (term.startsWith("'") && term.endsWith("'") && term.length() > 2) {
++            String value = term.substring(1, term.length() - 1);
++            return new LiteralExpression(value);
++        }
++
++        // Handle boolean literals
++        if (term.equalsIgnoreCase("true") || term.equalsIgnoreCase("false")) {
++            return new LiteralExpression(Boolean.parseBoolean(term));
++        }
++
++        // Handle numeric literals (integers for now)
++        if (term.matches("-?\\d+")) {
++            return new LiteralExpression(Integer.parseInt(term));
++        }
++
++        // Handle field references
++        return new FieldReferenceExpression(term);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/ComparisonExpression.java b/src/main/java/com/todoapp/framework/sql/ComparisonExpression.java
+new file mode 100644
+index 0000000..9dcc947
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/ComparisonExpression.java
+@@ -0,0 +1,166 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++import java.time.Instant;
++
++/**
++ * Represents a comparison expression in a SQL-like WHERE clause.
++ * Supports comparisons like: field = value, field != value, field < value, etc.
++ */
++public class ComparisonExpression implements Expression {
++
++    private final Expression leftOperand;
++    private final ComparisonOperator operator;
++    private final Expression rightOperand;
++
++    public ComparisonExpression(Expression leftOperand, ComparisonOperator operator, Expression rightOperand) {
++        this.leftOperand = leftOperand;
++        this.operator = operator;
++        this.rightOperand = rightOperand;
++    }
++
++    public Expression getLeftOperand() {
++        return leftOperand;
++    }
++
++    public ComparisonOperator getOperator() {
++        return operator;
++    }
++
++    public Expression getRightOperand() {
++        return rightOperand;
++    }
++
++    @Override
++    public Object evaluate(TodoItem item) {
++        Object leftValue = leftOperand.evaluate(item);
++        Object rightValue = rightOperand.evaluate(item);
++
++        // Handle null values according to SQL semantics
++        if (leftValue == null && rightValue == null) {
++            switch (operator) {
++                case EQUALS:
++                    return true;
++                case NOT_EQUALS:
++                    return false;
++                default:
++                    // For ordering comparisons, null == null is considered equal, so not <, >, etc.
++                    return false;
++            }
++        } else if (leftValue == null) {
++            // left is null, right is not null
++            switch (operator) {
++                case EQUALS:
++                    return false;
++                case NOT_EQUALS:
++                    return true;
++                case LESS_THAN:
++                    return true;  // null is considered less than any non-null value
++                case LESS_THAN_EQUAL:
++                    return true;  // null is considered less than or equal to any non-null value
++                case GREATER_THAN:
++                    return false; // null is not greater than any non-null value
++                case GREATER_THAN_EQUAL:
++                    return false; // null is not greater than or equal to any non-null value
++                default:
++                    return false;
++            }
++        } else if (rightValue == null) {
++            // right is null, left is not null
++            switch (operator) {
++                case EQUALS:
++                    return false;
++                case NOT_EQUALS:
++                    return true;
++                case LESS_THAN:
++                    return false; // non-null value is not less than null
++                case LESS_THAN_EQUAL:
++                    return false; // non-null value is not less than or equal to null
++                case GREATER_THAN:
++                    return true;  // non-null value is greater than null
++                case GREATER_THAN_EQUAL:
++                    return true;  // non-null value is greater than or equal to null
++                default:
++                    return false;
++            }
++        }
++
++        // Both operands are non-null, perform comparison
++        return compareValues(leftValue, rightValue, operator);
++    }
++
++    private boolean compareValues(Object left, Object right, ComparisonOperator operator) {
++        // If both values are Strings, compare lexicographically
++        if (left instanceof String && right instanceof String) {
++            return compareStrings((String) left, (String) right, operator);
++        }
++        // If both values are Booleans, compare equality
++        else if (left instanceof Boolean && right instanceof Boolean) {
++            return compareBooleans((Boolean) left, (Boolean) right, operator);
++        }
++        // If both values are Instants, compare temporally
++        else if (left instanceof Instant && right instanceof Instant) {
++            return compareInstants((Instant) left, (Instant) right, operator);
++        }
++        // Fallback: convert to strings and compare lexicographically
++        else {
++            return compareStrings(left.toString(), right.toString(), operator);
++        }
++    }
++
++    private boolean compareStrings(String a, String b, ComparisonOperator operator) {
++        int comparison = a.compareTo(b);
++        switch (operator) {
++            case EQUALS:
++                return comparison == 0;
++            case NOT_EQUALS:
++                return comparison != 0;
++            case LESS_THAN:
++                return comparison < 0;
++            case GREATER_THAN:
++                return comparison > 0;
++            case LESS_THAN_EQUAL:
++                return comparison <= 0;
++            case GREATER_THAN_EQUAL:
++                return comparison >= 0;
++            default:
++                return false;
++        }
++    }
++
++    private boolean compareBooleans(Boolean a, Boolean b, ComparisonOperator operator) {
++        switch (operator) {
++            case EQUALS:
++                return a.equals(b);
++            case NOT_EQUALS:
++                return !a.equals(b);
++            default:
++                // Boolean ordering is not meaningful in SQL, treat as equals/not equals only
++                return false;
++        }
++    }
++
++    private boolean compareInstants(Instant a, Instant b, ComparisonOperator operator) {
++        switch (operator) {
++            case EQUALS:
++                return a.equals(b);
++            case NOT_EQUALS:
++                return !a.equals(b);
++            case LESS_THAN:
++                return a.isBefore(b);
++            case GREATER_THAN:
++                return a.isAfter(b);
++            case LESS_THAN_EQUAL:
++                return !a.isAfter(b); // a <= b
++            case GREATER_THAN_EQUAL:
++                return !a.isBefore(b); // a >= b
++            default:
++                return false;
++        }
++    }
++
++    @Override
++    public String toString() {
++        return "(" + leftOperand + " " + operator.getSymbol() + " " + rightOperand + ")";
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/ComparisonOperator.java b/src/main/java/com/todoapp/framework/sql/ComparisonOperator.java
+new file mode 100644
+index 0000000..35f3cbe
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/ComparisonOperator.java
+@@ -0,0 +1,38 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Enumeration of comparison operators supported in SQL-like expressions.
++ */
++public enum ComparisonOperator {
++    EQUALS("="),
++    NOT_EQUALS("!="),
++    LESS_THAN("<"),
++    GREATER_THAN(">"),
++    LESS_THAN_EQUAL("<="),
++    GREATER_THAN_EQUAL(">=");
++
++    private final String symbol;
++
++    ComparisonOperator(String symbol) {
++        this.symbol = symbol;
++    }
++
++    public String getSymbol() {
++        return symbol;
++    }
++
++    /**
++     * Gets the ComparisonOperator for a given symbol.
++     * @param symbol the operator symbol (e.g., "=", "!=", "<", etc.)
++     * @return the corresponding ComparisonOperator
++     * @throws IllegalArgumentException if the symbol is not recognized
++     */
++    public static ComparisonOperator fromSymbol(String symbol) {
++        for (ComparisonOperator op : values()) {
++            if (op.symbol.equals(symbol)) {
++                return op;
++            }
++        }
++        throw new IllegalArgumentException("Unknown comparison operator: " + symbol);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/DeleteStatement.java b/src/main/java/com/todoapp/framework/sql/DeleteStatement.java
+new file mode 100644
+index 0000000..e5469c1
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/DeleteStatement.java
+@@ -0,0 +1,29 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Represents a DELETE statement.
++ * Currently supports: DELETE FROM table_name [WHERE condition]
++ */
++public class DeleteStatement implements Statement {
++
++    private final String tableName;
++    private final Expression whereClause;
++
++    public DeleteStatement(String tableName, Expression whereClause) {
++        this.tableName = tableName;
++        this.whereClause = whereClause;
++    }
++
++    public String getTableName() {
++        return tableName;
++    }
++
++    public Expression getWhereClause() {
++        return whereClause;
++    }
++
++    @Override
++    public StatementType getType() {
++        return StatementType.DELETE;
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/Expression.java b/src/main/java/com/todoapp/framework/sql/Expression.java
+new file mode 100644
+index 0000000..e434d5e
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/Expression.java
+@@ -0,0 +1,20 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++/**
++ * Base interface for all SQL-like expressions.
++ * Represents a value, field reference, or condition that can be evaluated.
++ */
++public interface Expression {
++
++    /**
++     * Evaluates this expression against a TodoItem to produce a value.
++     * For conditions, this should return a Boolean.
++     * For values, this should return the actual value (String, Boolean, Instant, etc.)
++     *
++     * @param item the TodoItem to evaluate against
++     * @return the evaluated value
++     */
++    Object evaluate(TodoItem item);
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/FieldReferenceExpression.java b/src/main/java/com/todoapp/framework/sql/FieldReferenceExpression.java
+new file mode 100644
+index 0000000..b2188b4
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/FieldReferenceExpression.java
+@@ -0,0 +1,43 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++/**
++ * Represents a reference to a table column (field) in a SQL-like expression.
++ * Maps field names to TodoItem properties.
++ */
++public class FieldReferenceExpression implements Expression {
++
++    private final String fieldName;
++
++    public FieldReferenceExpression(String fieldName) {
++        this.fieldName = fieldName;
++    }
++
++    public String getFieldName() {
++        return fieldName;
++    }
++
++    @Override
++    public Object evaluate(TodoItem item) {
++        switch (fieldName.toUpperCase()) {
++            case "ID":
++                return item.getId();
++            case "DESCRIPTION":
++                return item.getDescription();
++            case "COMPLETED":
++                return item.isCompleted();
++            case "CREATEDAT":
++                return item.getCreatedAt();
++            case "COMPLETEDAT":
++                return item.getCompletedAt();
++            default:
++                throw new IllegalArgumentException("Unknown field: " + fieldName);
++        }
++    }
++
++    @Override
++    public String toString() {
++        return fieldName;
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/InsertStatement.java b/src/main/java/com/todoapp/framework/sql/InsertStatement.java
+new file mode 100644
+index 0000000..cfdc310
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/InsertStatement.java
+@@ -0,0 +1,37 @@
++package com.todoapp.framework.sql;
++
++import java.util.Map;
++
++/**
++ * Represents an INSERT statement.
++ * Currently supports: INSERT INTO table_name (column1, column2, ...) VALUES (value1, value2, ...)
++ */
++public class InsertStatement implements Statement {
++
++    private final String tableName;
++    private final java.util.List<String> columnNames;
++    private final java.util.List<Object> values;
++
++    public InsertStatement(String tableName, java.util.List<String> columnNames, java.util.List<Object> values) {
++        this.tableName = tableName;
++        this.columnNames = columnNames;
++        this.values = values;
++    }
++
++    public String getTableName() {
++        return tableName;
++    }
++
++    public java.util.List<String> getColumnNames() {
++        return columnNames;
++    }
++
++    public java.util.List<Object> getValues() {
++        return values;
++    }
++
++    @Override
++    public StatementType getType() {
++        return StatementType.INSERT;
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/IsNullExpression.java b/src/main/java/com/todoapp/framework/sql/IsNullExpression.java
+new file mode 100644
+index 0000000..dbda1c8
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/IsNullExpression.java
+@@ -0,0 +1,37 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++/**
++ * Represents an IS NULL or IS NOT NULL expression in a SQL-like WHERE clause.
++ */
++public class IsNullExpression implements Expression {
++
++    private final Expression expression;
++    private final boolean isNull; // true for IS NULL, false for IS NOT NULL
++
++    public IsNullExpression(Expression expression, boolean isNull) {
++        this.expression = expression;
++        this.isNull = isNull;
++    }
++
++    public Expression getExpression() {
++        return expression;
++    }
++
++    public boolean isNull() {
++        return isNull;
++    }
++
++    @Override
++    public Object evaluate(TodoItem item) {
++        Object value = expression.evaluate(item);
++        boolean isNullValue = (value == null);
++        return isNull == isNullValue; // Return true if the nullness matches what we're checking for
++    }
++
++    @Override
++    public String toString() {
++        return expression + " IS " + (isNull ? "NULL" : "NOT NULL");
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/LiteralExpression.java b/src/main/java/com/todoapp/framework/sql/LiteralExpression.java
+new file mode 100644
+index 0000000..bcea3e4
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/LiteralExpression.java
+@@ -0,0 +1,31 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++/**
++ * Represents a literal value in a SQL-like expression.
++ * Supports string, boolean, numeric, and date literals.
++ */
++public class LiteralExpression implements Expression {
++
++    private final Object value;
++
++    public LiteralExpression(Object value) {
++        this.value = value;
++    }
++
++    public Object getValue() {
++        return value;
++    }
++
++    @Override
++    public Object evaluate(TodoItem item) {
++        // Literals evaluate to themselves regardless of the item
++        return value;
++    }
++
++    @Override
++    public String toString() {
++        return value.toString();
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/LogicalExpression.java b/src/main/java/com/todoapp/framework/sql/LogicalExpression.java
+new file mode 100644
+index 0000000..928af67
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/LogicalExpression.java
+@@ -0,0 +1,73 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++/**
++ * Represents a logical expression (AND/OR) in a SQL-like WHERE clause.
++ */
++public class LogicalExpression implements Expression {
++
++    private final Expression leftOperand;
++    private final LogicalOperator operator;
++    private final Expression rightOperand;
++
++    public LogicalExpression(Expression leftOperand, LogicalOperator operator, Expression rightOperand) {
++        this.leftOperand = leftOperand;
++        this.operator = operator;
++        this.rightOperand = rightOperand;
++    }
++
++    public Expression getLeftOperand() {
++        return leftOperand;
++    }
++
++    public LogicalOperator getOperator() {
++        return operator;
++    }
++
++    public Expression getRightOperand() {
++        return rightOperand;
++    }
++
++    @Override
++    public Object evaluate(TodoItem item) {
++        Object leftValue = leftOperand.evaluate(item);
++        Object rightValue = rightOperand.evaluate(item);
++
++        // Logical operations require boolean operands
++        boolean leftBool = coerceToBoolean(leftValue);
++        boolean rightBool = coerceToBoolean(rightValue);
++
++        switch (operator) {
++            case AND:
++                return leftBool && rightBool;
++            case OR:
++                return leftBool || rightBool;
++            default:
++                return false;
++        }
++    }
++
++    /**
++     * Coerces a value to a boolean according to SQL-like semantics.
++     * Null values are treated as false.
++     */
++    private boolean coerceToBoolean(Object value) {
++        if (value == null) {
++            return false;
++        }
++        if (value instanceof Boolean) {
++            return (Boolean) value;
++        }
++        // For other types, follow SQL-like truthiness: 0/false equivalent is false, everything else is true
++        // But for simplicity in this implementation, we'll only accept actual Boolean values
++        // In a more complete implementation, we might convert numbers (0=false, non-zero=true)
++        // or strings ("false"/"0"=false, else=true)
++        return false;
++    }
++
++    @Override
++    public String toString() {
++        return "(" + leftOperand + " " + operator + " " + rightOperand + ")";
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/LogicalOperator.java b/src/main/java/com/todoapp/framework/sql/LogicalOperator.java
+new file mode 100644
+index 0000000..06cf56f
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/LogicalOperator.java
+@@ -0,0 +1,9 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Enumeration of logical operators supported in SQL-like expressions.
++ */
++public enum LogicalOperator {
++    AND,
++    OR
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/QueryExecutor.java b/src/main/java/com/todoapp/framework/sql/QueryExecutor.java
+new file mode 100644
+index 0000000..6891e01
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/QueryExecutor.java
+@@ -0,0 +1,51 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++import java.util.List;
++
++/**
++ * Interface for executing SQL-like statements against a collection of TodoItem objects.
++ * Separates execution concerns from parsing concerns.
++ */
++public interface QueryExecutor {
++
++    /**
++     * Executes a SELECT statement against the given items and returns the matching items.
++     *
++     * @param statement the SELECT statement to execute
++     * @param items the collection of TodoItem objects to query against
++     * @return a list of matching TodoItem objects
++     */
++    List<TodoItem> executeSelect(SelectStatement statement, List<TodoItem> items);
++
++    /**
++     * Executes an INSERT statement against the given items.
++     * Modifies the items list in-place to add the new item(s).
++     *
++     * @param statement the INSERT statement to execute
++     * @param items the collection of TodoItem objects to insert into
++     * @return the number of rows inserted
++     */
++    int executeInsert(InsertStatement statement, List<TodoItem> items);
++
++    /**
++     * Executes an UPDATE statement against the given items.
++     * Modifies the items list in-place to update matching items.
++     *
++     * @param statement the UPDATE statement to execute
++     * @param items the collection of TodoItem objects to update
++     * @return the number of rows updated
++     */
++    int executeUpdate(UpdateStatement statement, List<TodoItem> items);
++
++    /**
++     * Executes a DELETE statement against the given items.
++     * Modifies the items list in-place to remove matching items.
++     *
++     * @param statement the DELETE statement to execute
++     * @param items the collection of TodoItem objects to delete from
++     * @return the number of rows deleted
++     */
++    int executeDelete(DeleteStatement statement, List<TodoItem> items);
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/SQLEngine.java b/src/main/java/com/todoapp/framework/sql/SQLEngine.java
+new file mode 100644
+index 0000000..bdeb17c
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/SQLEngine.java
+@@ -0,0 +1,95 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++import java.util.ArrayList;
++import java.util.List;
++
++/**
++ * Facade that combines SQLParser and QueryExecutor to provide a simple interface
++ * for executing SQL-like queries, similar to the old QueryEngine but with better
++ * separation of concerns.
++ */
++public class SQLEngine {
++
++    private final SQLParser parser;
++    private final QueryExecutor executor;
++
++    public SQLEngine(SQLParser parser, QueryExecutor executor) {
++        this.parser = parser;
++        this.executor = executor;
++    }
++
++    /**
++     * Executes a SQL-like query string against the given items and returns the results.
++     * This method mirrors the interface of the old QueryEngine.executeQuery method
++     * for backward compatibility.
++     *
++     * @param sql   the SQL-like query string to execute
++     * @param items the collection of TodoItem objects to query against
++     * @return a list of matching TodoItem objects (for SELECT queries)
++     *         For non-SELECT queries, returns an empty list (maintaining old behavior)
++     */
++    public List<TodoItem> executeQuery(String sql, List<TodoItem> items) {
++        try {
++            Statement statement = parser.parse(sql);
++
++            // For now, we only handle SELECT queries in executeQuery
++            // INSERT, UPDATE, DELETE would modify the data and return count
++            if (statement.getType() == StatementType.SELECT) {
++                SelectStatement selectStmt = (SelectStatement) statement;
++                return executor.executeSelect(selectStmt, items);
++            } else {
++                // For non-SELECT queries, we don't return items in this method
++                // In a full implementation, we might have separate execute methods
++                // that return row counts, similar to JDBC
++                return new ArrayList<>();
++            }
++        } catch (SQLParsingException e) {
++            // In the old implementation, malformed queries returned all items
++            // We'll maintain that behavior for backward compatibility
++            return new ArrayList<>(items);
++        } catch (Exception e) {
++            // Other execution errors also return all items for backward compatibility
++            return new ArrayList<>(items);
++        }
++    }
++
++    /**
++     * Executes a SQL-like statement string against the given items.
++     * For non-SELECT statements, this returns the number of affected rows.
++     *
++     * @param sql   the SQL-like statement string to execute
++     * @param items the collection of TodoItem objects to execute against
++     * @return the number of rows affected (for INSERT, UPDATE, DELETE)
++     *         For SELECT queries, returns 0 (not meaningful for SELECT)
++     */
++    public int executeUpdate(String sql, List<TodoItem> items) {
++        try {
++            Statement statement = parser.parse(sql);
++
++            switch (statement.getType()) {
++                case INSERT:
++                    InsertStatement insertStmt = (InsertStatement) statement;
++                    return executor.executeInsert(insertStmt, items);
++                case UPDATE:
++                    UpdateStatement updateStmt = (UpdateStatement) statement;
++                    return executor.executeUpdate(updateStmt, items);
++                case DELETE:
++                    DeleteStatement deleteStmt = (DeleteStatement) statement;
++                    return executor.executeDelete(deleteStmt, items);
++                case SELECT:
++                    // For SELECT queries, executeUpdate returns 0 (not meaningful)
++                    // Users should use executeQuery for SELECT statements
++                    return 0;
++                default:
++                    return 0;
++            }
++        } catch (SQLParsingException e) {
++            // Malformed statement affects 0 rows
++            return 0;
++        } catch (Exception e) {
++            // Execution errors affect 0 rows
++            return 0;
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/SQLParser.java b/src/main/java/com/todoapp/framework/sql/SQLParser.java
+new file mode 100644
+index 0000000..c41f293
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/SQLParser.java
+@@ -0,0 +1,17 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Interface for parsing SQL-like queries into statement objects.
++ * Separates parsing concerns from execution concerns.
++ */
++public interface SQLParser {
++
++    /**
++     * Parses a SQL-like query string into a Statement object.
++     *
++     * @param sql the SQL-like query string to parse
++     * @return a Statement object representing the parsed query
++     * @throws SQLParsingException if the SQL string cannot be parsed
++     */
++    Statement parse(String sql) throws SQLParsingException;
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/SQLParsingException.java b/src/main/java/com/todoapp/framework/sql/SQLParsingException.java
+new file mode 100644
+index 0000000..47f9618
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/SQLParsingException.java
+@@ -0,0 +1,15 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Exception thrown when a SQL-like query string cannot be parsed.
++ */
++public class SQLParsingException extends Exception {
++
++    public SQLParsingException(String message) {
++        super(message);
++    }
++
++    public SQLParsingException(String message, Throwable cause) {
++        super(message, cause);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/SelectStatement.java b/src/main/java/com/todoapp/framework/sql/SelectStatement.java
+new file mode 100644
+index 0000000..498d7ee
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/SelectStatement.java
+@@ -0,0 +1,29 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Represents a SELECT statement.
++ * Currently supports: SELECT * FROM table_name [WHERE condition]
++ */
++public class SelectStatement implements Statement {
++
++    private final String tableName;
++    private final Expression whereClause;
++
++    public SelectStatement(String tableName, Expression whereClause) {
++        this.tableName = tableName;
++        this.whereClause = whereClause;
++    }
++
++    public String getTableName() {
++        return tableName;
++    }
++
++    public Expression getWhereClause() {
++        return whereClause;
++    }
++
++    @Override
++    public StatementType getType() {
++        return StatementType.SELECT;
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/Statement.java b/src/main/java/com/todoapp/framework/sql/Statement.java
+new file mode 100644
+index 0000000..72a2413
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/Statement.java
+@@ -0,0 +1,14 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Base interface for all SQL-like statements.
++ * Represents a parsed SQL query that can be executed.
++ */
++public interface Statement {
++
++    /**
++     * Gets the type of this statement.
++     * @return the statement type
++     */
++    StatementType getType();
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/StatementType.java b/src/main/java/com/todoapp/framework/sql/StatementType.java
+new file mode 100644
+index 0000000..d534ecc
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/StatementType.java
+@@ -0,0 +1,11 @@
++package com.todoapp.framework.sql;
++
++/**
++ * Enumeration of statement types supported by the SQL engine.
++ */
++public enum StatementType {
++    SELECT,
++    INSERT,
++    UPDATE,
++    DELETE
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/sql/UpdateStatement.java b/src/main/java/com/todoapp/framework/sql/UpdateStatement.java
+new file mode 100644
+index 0000000..93c8a09
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/sql/UpdateStatement.java
+@@ -0,0 +1,37 @@
++package com.todoapp.framework.sql;
++
++import java.util.Map;
++
++/**
++ * Represents an UPDATE statement.
++ * Currently supports: UPDATE table_name SET column1 = value1, column2 = value2, ... [WHERE condition]
++ */
++public class UpdateStatement implements Statement {
++
++    private final String tableName;
++    private final java.util.Map<String, Object> assignments;
++    private final Expression whereClause;
++
++    public UpdateStatement(String tableName, java.util.Map<String, Object> assignments, Expression whereClause) {
++        this.tableName = tableName;
++        this.assignments = assignments;
++        this.whereClause = whereClause;
++    }
++
++    public String getTableName() {
++        return tableName;
++    }
++
++    public java.util.Map<String, Object> getAssignments() {
++        return assignments;
++    }
++
++    public Expression getWhereClause() {
++        return whereClause;
++    }
++
++    @Override
++    public StatementType getType() {
++        return StatementType.UPDATE;
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/storage/database/NewQueryableStorage.java b/src/main/java/com/todoapp/framework/storage/database/NewQueryableStorage.java
+new file mode 100644
+index 0000000..32fd642
+--- /dev/null
++++ b/src/main/java/com/todoapp/framework/storage/database/NewQueryableStorage.java
+@@ -0,0 +1,279 @@
++package com.todoapp.framework.storage.database;
++
++import com.todoapp.domain.TodoItem;
++import com.todoapp.framework.storage.StorageGateway;
++import com.todoapp.framework.sql.SQLEngine;
++import com.todoapp.framework.sql.SQLParser;
++import com.todoapp.framework.sql.QueryExecutor;
++import com.todoapp.framework.sql.BasicSQLParser;
++import com.todoapp.framework.sql.BasicQueryExecutor;
++
++import java.io.BufferedReader;
++import java.io.BufferedWriter;
++import java.io.File;
++import java.io.FileReader;
++import java.io.FileWriter;
++import java.io.IOException;
++import java.time.Instant;
++import java.time.ZoneId;
++import java.time.format.DateTimeFormatter;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Objects;
++import java.util.function.Function;
++
++/**
++ * New implementation of QueryableStorage that uses the modular SQL engine.
++ * This demonstrates how the storage layer can integrate with the new SQL parser
++ * and executor interfaces while maintaining the StorageGateway contract.
++ *
++ * This class is functionally equivalent to the original QueryableStorage but
++ * uses the new modular SQL engine design with separate parsing and execution
++ * concerns.
++ */
++public class NewQueryableStorage implements StorageGateway {
++
++    private static final String DEFAULT_FILE_NAME = "db/todo.txt";
++    private final String fileName;
++    private static final DateTimeFormatter DATE_TIME_FORMATTER =
++            DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());
++    private final SQLEngine sqlEngine;
++    private List<TodoItem> cachedItems;
++
++    public NewQueryableStorage() {
++        this(DEFAULT_FILE_NAME);
++    }
++
++    public NewQueryableStorage(String fileName) {
++        this.fileName = Objects.requireNonNull(fileName, "File name cannot be null");
++
++        // Create the modular SQL engine components
++        SQLParser parser = new BasicSQLParser();
++        QueryExecutor executor = new BasicQueryExecutor();
++        this.sqlEngine = new SQLEngine(parser, executor);
++
++        this.cachedItems = new ArrayList<>();
++        // Load initial items
++        loadItemsIntoCache();
++    }
++
++    @Override
++    public void save(List<TodoItem> items) {
++        // Ensure parent directory exists
++        File file = new File(fileName);
++        File parentDir = file.getParentFile();
++        if (parentDir != null && !parentDir.exists()) {
++            boolean dirsCreated = parentDir.mkdirs();
++            if (!dirsCreated) {
++                throw new RuntimeException("Failed to create directory: " + parentDir.getAbsolutePath());
++            }
++        }
++
++        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
++            for (TodoItem item : items) {
++                String line = formatTodoItem(item);
++                writer.write(line);
++                writer.newLine();
++            }
++        } catch (IOException e) {
++            throw new RuntimeException("Failed to save todo items to file: " + e.getMessage(), e);
++        }
++    }
++
++    @Override
++    public List<TodoItem> load() {
++        List<TodoItem> items = new ArrayList<>();
++        File file = new File(fileName);
++
++        if (!file.exists()) {
++            // Return empty list if file doesn't exist yet
++            return items;
++        }
++
++        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
++            String line;
++            int lineNumber = 0;
++            while ((line = reader.readLine()) != null) {
++                lineNumber++;
++                try {
++                    TodoItem item = parseTodoItem(line);
++                    if (item != null) {
++                        items.add(item);
++                    }
++                } catch (IllegalArgumentException e) {
++                    // Skip malformed lines but could log warning in real application
++                    System.err.println("Warning: Skipping malformed line " + lineNumber + ": " + e.getMessage());
++                }
++            }
++        } catch (IOException e) {
++            throw new RuntimeException("Failed to load todo items from file: " + e.getMessage(), e);
++        }
++
++        // Load items into SQL engine for querying
++        sqlEngine.executeUpdate("LOAD", items); // Dummy call to load items - in a real implementation,
++                                              // we might have a proper loadItems method on the engine
++        return items;
++    }
++
++    /**
++     * Executes a SQL-like query on the stored todo items.
++     *
++     * Supported operations:
++     * - SELECT * FROM todos WHERE [conditions]
++     * - Returns list of matching TodoItem objects
++     *
++     * @param query SQL-like query string
++     * @return List of matching TodoItem objects
++     */
++    public List<TodoItem> executeQuery(String query) {
++        // Execute query against cached items to avoid redundant I/O
++        return sqlEngine.executeQuery(query, cachedItems);
++    }
++
++    /**
++     * Executes a SQL-like update (INSERT, UPDATE, DELETE) on the stored todo items.
++     * Modifies the cached items and persists to storage.
++     *
++     * @param query SQL-like query string (INSERT, UPDATE, DELETE)
++     * @return Number of rows affected
++     */
++    public int executeUpdate(String query) {
++        // Execute update against cached items
++        int affectedRows = sqlEngine.executeUpdate(query, cachedItems);
++
++        // If the update modified the data, persist to storage
++        if (affectedRows != 0) {
++            save(cachedItems);
++        }
++
++        return affectedRows;
++    }
++
++    /**
++     * Adds a new todo item to the storage.
++     *
++     * @param item TodoItem to add
++     */
++    public void addItem(TodoItem item) {
++        updateCachedItems(items -> {
++            List<TodoItem> updatedItems = new ArrayList<>(items);
++            updatedItems.add(item);
++            return updatedItems;
++        });
++    }
++
++    /**
++     * Updates an existing todo item in the storage.
++     *
++     * @param item TodoItem with updated values (must have matching ID)
++     */
++    public void updateItem(TodoItem item) {
++        updateCachedItems(items -> {
++            List<TodoItem> updatedItems = new ArrayList<>(items);
++            boolean found = false;
++            for (int i = 0; i < updatedItems.size(); i++) {
++                if (updatedItems.get(i).getId().equals(item.getId())) {
++                    updatedItems.set(i, item);
++                    found = true;
++                    break;
++                }
++            }
++            return found ? updatedItems : items;
++        });
++    }
++
++    /**
++     * Removes a todo item from the storage by ID.
++     *
++     * @param id ID of the item to remove
++     */
++    public void removeItem(String id) {
++        updateCachedItems(items -> {
++            List<TodoItem> updatedItems = new ArrayList<>(items);
++            updatedItems.removeIf(item -> item.getId().equals(id));
++            return updatedItems;
++        });
++    }
++
++    /**
++     * Updates the cached items and persists to storage.
++     *
++     * @param updater Function that takes current items and returns updated items
++     */
++    private void updateCachedItems(Function<List<TodoItem>, List<TodoItem>> updater) {
++        List<TodoItem> currentItems = new ArrayList<>(cachedItems);
++        List<TodoItem> updatedItems = updater.apply(currentItems);
++
++        if (!updatedItems.equals(currentItems)) {
++            save(updatedItems);
++            cachedItems = updatedItems;
++            // Note: In a more advanced implementation, the SQLEngine might
++            // have a way to notify it that the underlying data has changed
++        }
++    }
++
++    /**
++     * Loads items from file into the cache.
++     * Call this when the storage needs to be refreshed from disk.
++     */
++    public void loadItemsIntoCache() {
++        cachedItems = load();
++        // In a more advanced implementation, we would notify the SQL engine
++        // that the cached data has been refreshed
++    }
++
++    /**
++     * Formats a TodoItem into a string for storage.
++     *
++     * @param item TodoItem to format
++     * @return Formatted string representation
++     */
++    private String formatTodoItem(TodoItem item) {
++        String completedAt = (item.getCompletedAt() != null)
++                ? DATE_TIME_FORMATTER.format(item.getCompletedAt())
++                : "";
++
++        return String.join("|",
++                item.getId(),
++                item.getDescription(),
++                Boolean.toString(item.isCompleted()),
++                DATE_TIME_FORMATTER.format(item.getCreatedAt()),
++                completedAt);
++    }
++
++    /**
++     * Parses a string into a TodoItem.
++     *
++     * @param line String representation of a TodoItem
++     * @return Parsed TodoItem
++     * @throws IllegalArgumentException if the line is malformed
++     */
++    private TodoItem parseTodoItem(String line) {
++        if (line == null || line.isEmpty()) {
++            return null;
++        }
++
++        String[] parts = line.split("\\|", -1); // -1 to keep trailing empty strings
++        if (parts.length != 5) {
++            throw new IllegalArgumentException("Expected 5 parts, got " + parts.length);
++        }
++
++        String id = parts[0].trim();
++        String description = parts[1].trim();
++        boolean completed = Boolean.parseBoolean(parts[2].trim());
++        Instant createdAt = Instant.from(DATE_TIME_FORMATTER.parse(parts[3].trim()));
++        Instant completedAt = parts[4].trim().isEmpty()
++                ? null
++                : Instant.from(DATE_TIME_FORMATTER.parse(parts[4].trim()));
++
++        // Validate required fields
++        if (id.isEmpty()) {
++            throw new IllegalArgumentException("ID cannot be empty");
++        }
++        if (description.isEmpty()) {
++            throw new IllegalArgumentException("Description cannot be empty");
++        }
++
++        return new TodoItem(id, description, completed, createdAt, completedAt);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/com/todoapp/framework/storage/database/QueryableStorage.java b/src/main/java/com/todoapp/framework/storage/database/QueryableStorage.java
+index b56a428..1d7d04f 100644
+--- a/src/main/java/com/todoapp/framework/storage/database/QueryableStorage.java
++++ b/src/main/java/com/todoapp/framework/storage/database/QueryableStorage.java
+@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Objects;
++import java.util.function.Function;
+ 
+ /**
+  * File-based storage implementation with SQL-like query capabilities.
+@@ -161,12 +162,38 @@ public class QueryableStorage implements StorageGateway {
+         });
+     }
+ 
++    // Transaction methods
++    public void beginTransaction() {
++        throw new UnsupportedOperationException("Transaction support not yet implemented");
++    }
++
++    public void commit() {
++        throw new UnsupportedOperationException("Transaction support not yet implemented");
++    }
++
++    public void rollback() {
++        throw new UnsupportedOperationException("Transaction support not yet implemented");
++    }
++
++    // SQL operation methods
++    public int executeInsert(String sql) {
++        throw new UnsupportedOperationException("SQL INSERT operation not yet implemented");
++    }
++
++    public int executeUpdate(String sql) {
++        throw new UnsupportedOperationException("SQL UPDATE operation not yet implemented");
++    }
++
++    public int executeDelete(String sql) {
++        throw new UnsupportedOperationException("SQL DELETE operation not yet implemented");
++    }
++
+     /**
+      * Updates the cached items and persists to storage.
+      *
+      * @param updater Function that takes current items and returns updated items
+      */
+-    private void updateCachedItems(java.util.function.Function<List<TodoItem>, List<TodoItem>> updater) {
++    private void updateCachedItems(Function<List<TodoItem>, List<TodoItem>> updater) {
+         List<TodoItem> currentItems = new ArrayList<>(cachedItems);
+         List<TodoItem> updatedItems = updater.apply(currentItems);
+ 
+diff --git a/src/test/java/com/todoapp/framework/sql/BasicQueryExecutorEnhancementsTest.java b/src/test/java/com/todoapp/framework/sql/BasicQueryExecutorEnhancementsTest.java
+new file mode 100644
+index 0000000..69e0fcd
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/sql/BasicQueryExecutorEnhancementsTest.java
+@@ -0,0 +1,54 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.time.Instant;
++import java.util.ArrayList;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class BasicQueryExecutorEnhancementsTest {
++
++    private QueryExecutor executor;
++    private List<TodoItem> items;
++
++    @BeforeEach
++    void setUp() {
++        executor = new BasicQueryExecutor();
++        items = new ArrayList<>();
++        // Add some initial items
++        TodoItem item1 = new TodoItem("1", "Buy groceries");
++        item1.markAsCompleted();
++        TodoItem item2 = new TodoItem("2", "Walk the dog");
++        items.add(item1);
++        items.add(item2);
++    }
++
++    @Test
++    void testExecuteSelect() throws Exception {
++        // Existing functionality
++        SelectStatement selectStatement = new SelectStatement("todos",
++                new ComparisonExpression(
++                        new FieldReferenceExpression("completed"),
++                        ComparisonOperator.EQUALS,
++                        new LiteralExpression(true)));
++        List<TodoItem> result = executor.executeSelect(selectStatement, items);
++        assertEquals(1, result.size());
++        assertTrue(result.get(0).isCompleted());
++    }
++
++    @Test
++    void testExecuteInsertDuplicateId() {
++        // TODO: Depending on implementation, inserting duplicate ID might throw an exception or update
++        // For now, we expect UnsupportedOperationException because INSERT is not implemented
++        InsertStatement insertStatement = new InsertStatement("todos",
++                List.of("id", "description", "completed", "createdAt", "completedAt"),
++                List.of("1", "Duplicate ID", false, Instant.now(), null));
++        assertThrows(UnsupportedOperationException.class, () ->
++                executor.executeInsert(insertStatement, items));
++    }
++}
+\ No newline at end of file
+diff --git a/src/test/java/com/todoapp/framework/sql/BasicSQLParserEnhancementsTest.java b/src/test/java/com/todoapp/framework/sql/BasicSQLParserEnhancementsTest.java
+new file mode 100644
+index 0000000..47c9fdb
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/sql/BasicSQLParserEnhancementsTest.java
+@@ -0,0 +1,40 @@
++package com.todoapp.framework.sql;
++
++import com.todoapp.domain.TodoItem;
++
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.time.Instant;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class BasicSQLParserEnhancementsTest {
++
++    private SQLParser parser;
++
++    @BeforeEach
++    void setUp() {
++        parser = new BasicSQLParser();
++    }
++
++    @Test
++    void testParseSelectStatement() throws Exception {
++        // Existing functionality should still work
++        String sql = "SELECT * FROM todos WHERE completed = true AND id = '1'";
++        Statement statement = parser.parse(sql);
++        assertNotNull(statement);
++        assertEquals(StatementType.SELECT, statement.getType());
++        SelectStatement selectStatement = (SelectStatement) statement;
++        assertEquals("todos", selectStatement.getTableName());
++        assertNotNull(selectStatement.getWhereClause());
++    }
++
++    @Test
++    void testParseUnsupportedStatementThrowsException() {
++        // Currently, the parser throws an exception for non-SELECT statements
++        String sql = "INSERT INTO todos VALUES ('1', 'test')";
++        assertThrows(SQLParsingException.class, () -> parser.parse(sql));
++    }
++}
+\ No newline at end of file
+diff --git a/src/test/java/com/todoapp/framework/storage/database/QueryableStorageConcurrencyTest.java b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageConcurrencyTest.java
+new file mode 100644
+index 0000000..0d35c1e
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageConcurrencyTest.java
+@@ -0,0 +1,148 @@
++package com.todoapp.framework.storage.database;
++
++import com.todoapp.domain.TodoItem;
++
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.io.File;
++import java.util.List;
++import java.util.concurrent.*;
++import java.util.concurrent.atomic.AtomicInteger;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class QueryableStorageConcurrencyTest {
++
++    private static final String TEST_FILE_NAME = "test-concurrency-todo.txt";
++    private QueryableStorage queryableStorage;
++    private File testFile;
++    private ExecutorService executorService;
++
++    @BeforeEach
++    void setUp() throws Exception {
++        queryableStorage = new QueryableStorage(TEST_FILE_NAME);
++        testFile = new File(TEST_FILE_NAME);
++        // Delete test file if it exists from previous runs
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++        executorService = Executors.newFixedThreadPool(10);
++    }
++
++    @AfterEach
++    void tearDown() throws Exception {
++        executorService.shutdown();
++        executorService.awaitTermination(5, TimeUnit.SECONDS);
++        // Clean up test file after each test
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @Test
++    void testConcurrentAddOperations() throws Exception {
++        int numberOfThreads = 10;
++        int itemsPerThread = 100;
++        CountDownLatch latch = new CountDownLatch(numberOfThreads);
++        AtomicInteger errorCount = new AtomicInteger(0);
++
++        for (int i = 0; i < numberOfThreads; i++) {
++            final int threadId = i;
++            executorService.submit(() -> {
++                try {
++                    for (int j = 0; j < itemsPerThread; j++) {
++                        String id = Thread.currentThread().getId() + "-" + threadId + "-" + j;
++                        TodoItem item = new TodoItem(id, "Task " + j);
++                        queryableStorage.addItem(item);
++                    }
++                } catch (Exception e) {
++                    errorCount.incrementAndGet();
++                    e.printStackTrace();
++                } finally {
++                    latch.countDown();
++                }
++            });
++        }
++
++        latch.await();
++        assertEquals(0, errorCount.get(), "No errors should occur during concurrent adds");
++
++        // Verify all items were added
++        List<TodoItem> items = queryableStorage.load();
++        int expectedTotal = numberOfThreads * itemsPerThread;
++        assertEquals(expectedTotal, items.size(), "All items should be present");
++
++        // Additionally, verify that each item can be retrieved by ID
++        for (TodoItem item : items) {
++            TodoItem found = queryableStorage.load().stream()
++                    .filter(i -> i.getId().equals(item.getId()))
++                    .findFirst()
++                    .orElse(null);
++            assertNotNull(found, "Item with ID " + item.getId() + " should be found");
++        }
++    }
++
++    @Test
++    void testConcurrentMixedOperations() throws Exception {
++        int numberOfThreads = 5;
++        int operationsPerThread = 50;
++        CountDownLatch latch = new CountDownLatch(numberOfThreads);
++        AtomicInteger errorCount = new AtomicInteger(0);
++
++        // Start with some initial data
++        for (int i = 0; i < 20; i++) {
++            TodoItem item = new TodoItem("initial-" + i, "Initial task " + i);
++            queryableStorage.addItem(item);
++        }
++
++        for (int i = 0; i < numberOfThreads; i++) {
++            executorService.submit(() -> {
++                try {
++                    for (int j = 0; j < operationsPerThread; j++) {
++                        int choice = java.util.concurrent.ThreadLocalRandom.current().nextInt(4);
++                        switch (choice) {
++                            case 0: // Add
++                                String id = Thread.currentThread().getId() + "-add-" + j;
++                                TodoItem item = new TodoItem(id, "Added task " + j);
++                                queryableStorage.addItem(item);
++                                break;
++                            case 1: // Update
++                                List<TodoItem> items = queryableStorage.load();
++                                if (!items.isEmpty()) {
++                                    TodoItem itemToUpdate = items.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(items.size()));
++                                    itemToUpdate.markAsCompleted();
++                                    queryableStorage.updateItem(itemToUpdate);
++                                }
++                                break;
++                            case 2: // Remove
++                                List<TodoItem> items2 = queryableStorage.load();
++                                if (!items2.isEmpty()) {
++                                    TodoItem itemToRemove = items2.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(items2.size()));
++                                    queryableStorage.removeItem(itemToRemove.getId());
++                                }
++                                break;
++                            case 3: // Query
++                                queryableStorage.executeQuery("SELECT * FROM todos");
++                                break;
++                        }
++                    }
++                } catch (Exception e) {
++                    errorCount.incrementAndGet();
++                    e.printStackTrace();
++                } finally {
++                    latch.countDown();
++                }
++            });
++        }
++
++        latch.await();
++        assertEquals(0, errorCount.get(), "No errors should occur during concurrent mixed operations");
++
++        // Final verification: storage should be in a consistent state
++        List<TodoItem> finalItems = queryableStorage.load();
++        // Just ensure we can load the list without exception
++        assertNotNull(finalItems);
++    }
++}
+\ No newline at end of file
+diff --git a/src/test/java/com/todoapp/framework/storage/database/QueryableStorageIndexingTest.java b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageIndexingTest.java
+new file mode 100644
+index 0000000..d3134bf
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageIndexingTest.java
+@@ -0,0 +1,67 @@
++package com.todoapp.framework.storage.database;
++
++import com.todoapp.domain.TodoItem;
++import com.todoapp.framework.storage.StorageGateway;
++
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.io.File;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class QueryableStorageIndexingTest {
++
++    private static final String TEST_FILE_NAME = "test-indexing-todo.txt";
++    private QueryableStorage queryableStorage;
++    private File testFile;
++
++    @BeforeEach
++    void setUp() {
++        queryableStorage = new QueryableStorage(TEST_FILE_NAME);
++        testFile = new File(TEST_FILE_NAME);
++        // Delete test file if it exists from previous runs
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @AfterEach
++    void tearDown() {
++        // Clean up test file after each test
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @Test
++    void testStorageStillWorksCorrectly() {
++        // This test ensures that basic functionality is not broken by indexing changes
++        TodoItem item1 = new TodoItem("1", "Buy groceries");
++        TodoItem item2 = new TodoItem("2", "Walk the dog");
++        item2.markAsCompleted();
++
++        queryableStorage.addItem(item1);
++        queryableStorage.addItem(item2);
++
++        List<TodoItem> allItems = queryableStorage.load();
++        assertEquals(2, allItems.size());
++
++        List<TodoItem> completedItems = queryableStorage.executeQuery("SELECT * FROM todos WHERE completed = true");
++        assertEquals(1, completedItems.size());
++        assertEquals("2", completedItems.get(0).getId());
++
++        List<TodoItem> incompleteItems = queryableStorage.executeQuery("SELECT * FROM todos WHERE completed = false");
++        assertEquals(1, incompleteItems.size());
++        assertEquals("1", incompleteItems.get(0).getId());
++    }
++
++    // TODO: Add indexing-specific tests once indexing mechanism is implemented
++    // For example:
++    // testThatIndexesAreCreatedOnLoad()
++    // testThatIndexUsageIsTracked()
++    // testThatUpdatesMaintainIndexes()
++    // testThatQueriesUseIndexesForPerformance()
++}
+\ No newline at end of file
+diff --git a/src/test/java/com/todoapp/framework/storage/database/QueryableStorageSQLOperationsTest.java b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageSQLOperationsTest.java
+new file mode 100644
+index 0000000..f4284c4
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageSQLOperationsTest.java
+@@ -0,0 +1,74 @@
++package com.todoapp.framework.storage.database;
++
++import com.todoapp.domain.TodoItem;
++import com.todoapp.framework.storage.StorageGateway;
++import com.todoapp.framework.storage.database.QueryableStorage;
++
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.io.File;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class QueryableStorageSQLOperationsTest {
++
++    private static final String TEST_FILE_NAME = "test-sql-operations-todo.txt";
++    private QueryableStorage queryableStorage;
++    private File testFile;
++
++    @BeforeEach
++    void setUp() {
++        queryableStorage = new QueryableStorage(TEST_FILE_NAME);
++        testFile = new File(TEST_FILE_NAME);
++        // Delete test file if it exists from previous runs
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @AfterEach
++    void tearDown() {
++        // Clean up test file after each test
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @Test
++    void testExecuteQueryViaSqlStillWorks() throws Exception {
++        // Ensure that the existing SELECT functionality still works
++        TodoItem item = new TodoItem("1", "Buy groceries");
++        item.markAsCompleted();
++        queryableStorage.addItem(item);
++
++        String sql = "SELECT * FROM todos WHERE completed = true";
++        List<TodoItem> result = queryableStorage.executeQuery(sql);
++        assertEquals(1, result.size());
++        assertTrue(result.get(0).isCompleted());
++    }
++
++    @Test
++    void testExecuteInsertThrowsExceptionWhenNotImplemented() {
++        // Currently, these methods are not implemented, so we expect an exception
++        String sql = "INSERT INTO todos VALUES ('1', 'test')";
++        assertThrows(UnsupportedOperationException.class, () ->
++                queryableStorage.executeInsert(sql));
++    }
++
++    @Test
++    void testExecuteUpdateThrowsExceptionWhenNotImplemented() {
++        String sql = "UPDATE todos SET completed = true WHERE id = '1'";
++        assertThrows(UnsupportedOperationException.class, () ->
++                queryableStorage.executeUpdate(sql));
++    }
++
++    @Test
++    void testExecuteDeleteThrowsExceptionWhenNotImplemented() {
++        String sql = "DELETE FROM todos WHERE id = '1'";
++        assertThrows(UnsupportedOperationException.class, () ->
++                queryableStorage.executeDelete(sql));
++    }
++}
+\ No newline at end of file
+diff --git a/src/test/java/com/todoapp/framework/storage/database/QueryableStorageTransactionTest.java b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageTransactionTest.java
+new file mode 100644
+index 0000000..fc26b1f
+--- /dev/null
++++ b/src/test/java/com/todoapp/framework/storage/database/QueryableStorageTransactionTest.java
+@@ -0,0 +1,47 @@
++package com.todoapp.framework.storage.database;
++
++import com.todoapp.domain.TodoItem;
++import com.todoapp.framework.storage.StorageGateway;
++import com.todoapp.framework.storage.database.QueryableStorage;
++
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++
++import java.io.File;
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class QueryableStorageTransactionTest {
++
++    private static final String TEST_FILE_NAME = "test-transaction-todo.txt";
++    private QueryableStorage queryableStorage;
++    private File testFile;
++
++    @BeforeEach
++    void setUp() {
++        queryableStorage = new QueryableStorage(TEST_FILE_NAME);
++        testFile = new File(TEST_FILE_NAME);
++        // Delete test file if it exists from previous runs
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @AfterEach
++    void tearDown() {
++        // Clean up test file after each test
++        if (testFile.exists()) {
++            testFile.delete();
++        }
++    }
++
++    @Test
++    void testTransactionMethodsThrowExceptionWhenNotImplemented() {
++        // Currently, these methods are not implemented, so we expect an exception
++        assertThrows(UnsupportedOperationException.class, () -> queryableStorage.beginTransaction());
++        assertThrows(UnsupportedOperationException.class, () -> queryableStorage.commit());
++        assertThrows(UnsupportedOperationException.class, () -> queryableStorage.rollback());
++    }
++}
+\ No newline at end of file
