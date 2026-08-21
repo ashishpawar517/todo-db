@@ -29,10 +29,70 @@ public class TodoList {
      * @return The newly created TodoItem
      */
     public TodoItem addItem(String description) {
-        String id = UUID.randomUUID().toString();
+        String id = generateId();
         TodoItem item = new TodoItem(id, description);
         items.add(item);
         return item;
+    }
+
+    /**
+     * Generates a dynamic ID based on the number of items in the list.
+     * If item count < 2: 2-character ID
+     * If item count > 8: 3-character ID
+     * Otherwise: 2-character ID
+     * Uses base-36 encoding (0-9, a-z) for compact representation.
+     *
+     * @return Generated unique ID
+     */
+    private String generateId() {
+        int itemCount = items.size();
+        int idLength;
+
+        if (itemCount < 2) {
+            idLength = 2;
+        } else if (itemCount > 8) {
+            idLength = 3;
+        } else {
+            idLength = 2;
+        }
+
+        // Generate a random ID of specified length using base-36 characters
+        StringBuilder idBuilder = new StringBuilder(idLength);
+        String chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+        java.util.Random random = new java.util.Random();
+
+        for (int i = 0; i < idLength; i++) {
+            int randomIndex = random.nextInt(chars.length());
+            idBuilder.append(chars.charAt(randomIndex));
+        }
+
+        String generatedId = idBuilder.toString();
+
+        // Ensure uniqueness by checking against existing IDs
+        // If collision occurs (unlikely but possible), append a counter
+        int counter = 0;
+        String originalId = generatedId;
+        while (items.stream().anyMatch(item -> item.getId().equals(generatedId))) {
+            counter++;
+            // If we've tried too many times, fall back to UUID
+            if (counter > 1000) {
+                return UUID.randomUUID().toString();
+            }
+            // Append counter to maintain length while ensuring uniqueness
+            if (idLength == 2) {
+                generatedId = String.format("%-2s", originalId + counter).replace(' ', '0');
+                if (generatedId.length() > 2) {
+                    generatedId = generatedId.substring(0, 2);
+                }
+            } else {
+                generatedId = String.format("%-3s", originalId + counter).replace(' ', '0');
+                if (generatedId.length() > 3) {
+                    generatedId = generatedId.substring(0, 3);
+                }
+            }
+        }
+
+        return generatedId;
     }
 
     /**
